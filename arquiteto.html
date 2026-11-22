@@ -804,7 +804,7 @@ O futuro começa agora — inscreva-se no canal</textarea>
     <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between gap-2">
       <div class="min-w-0">
         <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">🦙 OLLAMA · CHAT LOCAL / NUVEM</h3>
-        <p class="font-mono-tech text-[10px] text-cyan-200/70">Funciona sem o ElevenLabs. A chave API fica só neste navegador, nunca no site.</p>
+        <p class="font-mono-tech text-[10px] text-cyan-200/70">Funciona sem o ElevenLabs. No telemóvel use o URL https do Worker. A chave do Ollama fica na Cloudflare, nunca no site.</p>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
         <span id="ollama-status-pill" class="font-mono-tech text-[9px] px-2 py-0.5 rounded-full bg-slate-500/20 border border-slate-400/30 text-slate-200">DESLIGADO</span>
@@ -815,14 +815,18 @@ O futuro começa agora — inscreva-se no canal</textarea>
     <div class="hud-scroll p-3 overflow-y-auto flex-1 min-h-0 space-y-3">
       <div class="rounded-xl bg-black/45 border border-cyan-500/20 p-2.5 space-y-2">
         <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">DEFINIÇÕES (GUARDADAS NESTE NAVEGADOR)</div>
+        <label class="flex flex-col gap-1">
+          <span class="font-mono-tech text-[9px] text-cyan-200/80">Endereço base (Worker https no telemóvel, ou localhost no PC)</span>
+          <input id="ollama-host" type="text" inputmode="url" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" placeholder="https://arquiteto-ollama.SEU-SUBDOMINIO.workers.dev" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-base text-white focus:outline-none focus:border-cyan-400" style="font-size:16px;" />
+        </label>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <label class="flex flex-col gap-1">
-            <span class="font-mono-tech text-[9px] text-cyan-200/80">Endereço base</span>
-            <input id="ollama-host" type="text" autocomplete="off" spellcheck="false" placeholder="http://localhost:11434" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+            <span class="font-mono-tech text-[9px] text-cyan-200/80">Token do painel (o mesmo PANEL_TOKEN da Cloudflare)</span>
+            <input id="ollama-panel-token" type="password" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" placeholder="Opcional, mas recomendado" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-base text-white focus:outline-none focus:border-cyan-400" style="font-size:16px;" />
           </label>
           <label class="flex flex-col gap-1">
-            <span class="font-mono-tech text-[9px] text-cyan-200/80">Chave API (opcional, Ollama na nuvem)</span>
-            <input id="ollama-key" type="password" autocomplete="off" spellcheck="false" placeholder="Só para https://ollama.com" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+            <span class="font-mono-tech text-[9px] text-cyan-200/80">Chave API do Ollama (não é precisa com o Worker)</span>
+            <input id="ollama-key" type="password" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" placeholder="Só se for direto a ollama.com no PC" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-base text-white focus:outline-none focus:border-cyan-400" style="font-size:16px;" />
           </label>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
@@ -838,7 +842,10 @@ O futuro começa agora — inscreva-se no canal</textarea>
           </div>
         </div>
         <div id="ollama-cloud-warn" class="hidden rounded-xl bg-amber-500/10 border border-amber-400/30 px-2.5 py-2 font-mono-tech text-[10px] text-amber-100 leading-relaxed">
-          O Ollama na nuvem (<span class="text-white">https://ollama.com/api</span>) não aceita pedidos diretos do navegador (CORS). O servidor não envia <span class="text-white">Access-Control-Allow-Origin</span> e o pré-voo OPTIONS devolve 405. Use o Ollama no seu computador (<span class="text-white">http://localhost:11434</span>) ou um proxy no servidor. Não coloque a chave API no código do site.
+          O Ollama na nuvem (<span class="text-white">https://ollama.com/api</span>) não aceita pedidos diretos do navegador (CORS) — por isso a chave que colou aqui sozinha não chega. No telemóvel não dá para instalar o Ollama local. Use a ponte: um Cloudflare Worker (ficheiro <span class="text-white">worker.js</span>). Cole o URL <span class="text-white">https://….workers.dev</span> neste endereço base e, se definiu, o token do painel. A chave API do Ollama fica como secret na Cloudflare, não neste campo e nunca no código do site.
+        </div>
+        <div id="ollama-proxy-ok" class="hidden rounded-xl bg-emerald-500/10 border border-emerald-400/30 px-2.5 py-2 font-mono-tech text-[10px] text-emerald-100 leading-relaxed">
+          A usar a ponte (Cloudflare Worker). No telemóvel cole o URL https://….workers.dev — o Safari aceita https sem problemas de conteúdo misto. A chave do Ollama não sai deste navegador: vai do Worker para o ollama.com. Preencha o token do painel se o configurou na Cloudflare.
         </div>
         <div id="ollama-test-msg" class="font-mono-tech text-[10px] text-cyan-200/70 whitespace-pre-wrap leading-relaxed"></div>
         <details class="rounded-xl bg-black/40 border border-cyan-500/15 px-2.5 py-2">
@@ -861,7 +868,7 @@ O futuro começa agora — inscreva-se no canal</textarea>
           <div id="ollama-chat-empty" class="text-center text-cyan-300/50 font-mono-tech text-[10px] mt-6 leading-relaxed">Escreva «ollama …» na barra de comando, ou pergunte aqui. Os comandos de música continuam a ter prioridade.</div>
         </div>
         <form id="ollama-form" class="flex items-center gap-1.5">
-          <input id="ollama-input" type="text" autocomplete="off" placeholder="Pergunte ao Ollama…" class="flex-1 min-w-0 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" />
+          <input id="ollama-input" type="text" autocomplete="off" placeholder="Pergunte ao Ollama…" class="flex-1 min-w-0 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-base text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" style="font-size:16px;" />
           <button type="submit" class="cyber-btn px-3 py-2 rounded-xl font-orbitron font-bold text-xs shrink-0">ENVIAR</button>
         </form>
       </div>
@@ -1624,6 +1631,7 @@ const OLLAMA_PAGES_ORIGIN = "https://marcelo7777777.github.io";
 const O = {
   host: LS.get("ollama_host", "http://localhost:11434"),
   key: LS.get("ollama_key", ""),
+  panelToken: LS.get("ollama_panel_token", ""),
   model: LS.get("ollama_model", ""),
   mode: !!LS.get("ollama_mode", false),
   messages: [],
@@ -1643,11 +1651,37 @@ function isOllamaCloud() {
   try { return /(^|\.)ollama\.com$/i.test(new URL(ollamaBase()).hostname); }
   catch (e) { return /ollama\.com/i.test(String(O.host || "")); }
 }
+function isOllamaLocal() {
+  try {
+    const host = new URL(ollamaBase()).hostname;
+    return host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "[::1]";
+  } catch (e) { return /localhost|127\.0\.0\.1/i.test(String(O.host || "")); }
+}
+function isOllamaProxy() {
+  try {
+    const u = new URL(ollamaBase());
+    if (/(^|\.)workers\.dev$/i.test(u.hostname)) return true;
+    if (u.protocol === "https:" && !isOllamaCloud() && !isOllamaLocal()) return true;
+    // wrangler / proxy local (qualquer porta que não seja a 11434 do Ollama)
+    if (isOllamaLocal() && u.port && u.port !== "11434") return true;
+    return false;
+  } catch (e) { return /workers\.dev/i.test(String(O.host || "")); }
+}
+function updateOllamaNotices() {
+  const el = $("ollama-host");
+  if (el && el.value.trim()) O.host = el.value.trim();
+  $("ollama-cloud-warn").classList.toggle("hidden", !isOllamaCloud());
+  $("ollama-proxy-ok").classList.toggle("hidden", !isOllamaProxy());
+}
 function ollamaHeaders(json) {
   const h = {};
   if (json) h["Content-Type"] = "application/json";
-  const key = String(O.key || "").trim();
-  if (key) h["Authorization"] = "Bearer " + key;
+  const tok = String(O.panelToken || "").trim();
+  if (tok) h["X-Panel-Token"] = tok;
+  if (!isOllamaProxy()) {
+    const key = String(O.key || "").trim();
+    if (key) h["Authorization"] = "Bearer " + key;
+  }
   return h;
 }
 function ollamaOriginsHelp() {
@@ -1669,18 +1703,23 @@ function ollamaOriginsHelp() {
 }
 function ollamaFetchError(why) {
   if (isOllamaCloud()) {
-    return "O Ollama na nuvem (https://ollama.com/api) não aceita pedidos diretos do navegador (CORS). Confirmado: o servidor não envia Access-Control-Allow-Origin e o pré-voo OPTIONS devolve 405. Use o Ollama no seu computador (http://localhost:11434) ou um proxy no servidor. A chave API não deve ir para o código do site.";
+    return "O Ollama na nuvem (https://ollama.com/api) não aceita pedidos diretos do navegador (CORS). A chave que colar aqui sozinha não chega. No telemóvel use a ponte: um Cloudflare Worker. Cole o URL https://….workers.dev no endereço base e o token do painel (se o definiu). A chave do Ollama fica como secret na Cloudflare, nunca no código do site.";
+  }
+  if (isOllamaProxy()) {
+    return "Não consegui ligar à ponte em " + ollamaBase() + (why ? " (" + why + ")" : "") + ". Confirme o URL do Worker, o token do painel e se os secrets OLLAMA_API_KEY e PANEL_TOKEN estão na Cloudflare (Settings → Variables and Secrets). O endereço tem de ser https, especialmente no Safari do telemóvel.";
   }
   return "Não consegui ligar ao Ollama em " + ollamaBase() + (why ? " (" + why + ")" : "") + ".\n\n" + ollamaOriginsHelp();
 }
 function saveOllamaSettings() {
   O.host = $("ollama-host").value.trim() || "http://localhost:11434";
   O.key = $("ollama-key").value;
+  O.panelToken = $("ollama-panel-token").value;
   O.model = $("ollama-model").value;
   LS.set("ollama_host", O.host);
   LS.set("ollama_key", O.key);
+  LS.set("ollama_panel_token", O.panelToken);
   LS.set("ollama_model", O.model);
-  $("ollama-cloud-warn").classList.toggle("hidden", !isOllamaCloud());
+  updateOllamaNotices();
 }
 function setOllamaMode(on) {
   O.mode = !!on;
@@ -1737,8 +1776,11 @@ async function ollamaReadError(res) {
   let detail = "";
   try { const t = await res.text(); try { const j = JSON.parse(t); detail = j.error || t; } catch (e) { detail = t; } } catch (e) {}
   detail = String(detail || "").trim().slice(0, 400);
-  if (res.status === 401 || res.status === 403) return "O Ollama recusou a autenticação (HTTP " + res.status + "). Se estiver a usar a nuvem, verifique a chave API nas definições." + (detail ? "\n" + detail : "");
-  if (res.status === 404) return "Recurso não encontrado (HTTP 404). Confirme o endereço e se o modelo está instalado (ollama pull …)." + (detail ? "\n" + detail : "");
+  if (res.status === 401 || res.status === 403) {
+    if (isOllamaProxy()) return "A ponte recusou a autenticação (HTTP " + res.status + "). Confirme o token do painel e, na Cloudflare, os secrets OLLAMA_API_KEY e PANEL_TOKEN." + (detail ? "\n" + detail : "");
+    return "O Ollama recusou a autenticação (HTTP " + res.status + "). Se estiver a usar a nuvem, verifique a chave API nas definições." + (detail ? "\n" + detail : "");
+  }
+  if (res.status === 404) return "Recurso não encontrado (HTTP 404). Confirme o endereço (sem /api no fim) e, se for local, se o modelo está instalado (ollama pull …)." + (detail ? "\n" + detail : "");
   return "O Ollama devolveu HTTP " + res.status + (detail ? ":\n" + detail : ".");
 }
 async function testOllama(quiet) {
@@ -1918,8 +1960,9 @@ function speakOllama(text) {
 $("ollama-origins-help").textContent = ollamaOriginsHelp();
 $("ollama-host").value = O.host || "http://localhost:11434";
 $("ollama-key").value = O.key || "";
+$("ollama-panel-token").value = O.panelToken || "";
 if (O.model) fillOllamaModels([O.model], O.model);
-$("ollama-cloud-warn").classList.toggle("hidden", !isOllamaCloud());
+updateOllamaNotices();
 $("btn-ollama-mode").classList.toggle("active", O.mode);
 $("btn-ollama-mode").textContent = O.mode ? "🦙 OLLAMA" : "🦙 JARVIS";
 if (O.mode) $("cmd-input").placeholder = "Pergunta ao Ollama (música e comandos locais têm prioridade)...";
@@ -1929,8 +1972,11 @@ $("btn-ollama-test").onclick = () => testOllama(false);
 $("btn-ollama-refresh").onclick = () => testOllama(false);
 $("ollama-host").onchange = saveOllamaSettings;
 $("ollama-host").onblur = saveOllamaSettings;
+$("ollama-host").oninput = updateOllamaNotices;
 $("ollama-key").onchange = saveOllamaSettings;
 $("ollama-key").onblur = saveOllamaSettings;
+$("ollama-panel-token").onchange = saveOllamaSettings;
+$("ollama-panel-token").onblur = saveOllamaSettings;
 $("ollama-model").onchange = saveOllamaSettings;
 $("ollama-form").onsubmit = (e) => {
   e.preventDefault();

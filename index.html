@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>J.A.R.V.I.S. — Painel de Controle</title>
 <meta name="theme-color" content="#02060d">
@@ -289,7 +290,7 @@ async function start(){
   const opts={
     agentId:AGENT_ID,
     onConnect:({conversationId})=>{ S.start=Date.now(); $("convId").textContent="SESSÃO "+(conversationId||"").slice(-6).toUpperCase(); addMsg("sys","Conexão estabelecida.","sys"); ticker("JARVIS ONLINE · PODE FALAR"); },
-    onDisconnect:(d)=>{ const why=d&&d.reason==="error"?"Erro: "+(d.message||""):d&&d.reason==="agent"?"Sessão encerrada pelo Jarvis.":"Sessão encerrada."; addMsg("sys",why,"sys"); end(true); },
+    onDisconnect:(d)=>{ if(S.start&&Date.now()-S.start<4000&&d&&d.reason!=="user"){ refused(); end(true); return; } const why=d&&d.reason==="error"?"Erro: "+(d.message||""):d&&d.reason==="agent"?"Sessão encerrada pelo Jarvis.":"Sessão encerrada."; addMsg("sys",why,"sys"); end(true); },
     onStatusChange:({status})=>{ S.status=status; renderStatus(); },
     onModeChange:({mode})=>{ S.mode=mode; renderStatus(); },
     onMessage:(m)=>{ const role=m.role||(m.source==="user"?"user":"agent"); if(!m.message) return; S.count++; $("sCount").textContent=S.count; addMsg(role,m.message); },
@@ -298,9 +299,14 @@ async function start(){
   try{ S.conv=await mod.Conversation.startSession({...opts,connectionType:"webrtc"}); }
   catch(e1){
     try{ S.conv=await mod.Conversation.startSession({...opts,connectionType:"websocket"}); }
-    catch(e2){ S.status="disconnected"; renderStatus(); ticker("FALHA NA CONEXÃO");
+    catch(e2){ S.status="disconnected"; renderStatus(); if(/not available/i.test((e2&&e2.message)||"")){ refused(); return; } ticker("FALHA NA CONEXÃO");
       showFallback("Não consegui conectar ao Jarvis ("+((e2&&e2.message)||"erro desconhecido")+"). Use o link direto do ElevenLabs."); return; }
   }
+  if(S.status==="disconnected"&&S.conv){ try{S.conv.endSession();}catch(e){} S.conv=null; renderStatus(); }
+}
+function refused(){
+  const msg="O ElevenLabs recusou a ligação: \"o agente não está disponível\". O painel está a funcionar; o problema está na conta ElevenLabs (o mais comum é terem acabado os créditos/minutos do plano). Veja o uso em elevenlabs.io → Subscription.";
+  addMsg("sys",msg,"sys"); ticker("JARVIS INDISPONÍVEL NA CONTA ELEVENLABS"); showFallback(msg);
 }
 function end(fromSdk){
   const c=S.conv; S.conv=null;

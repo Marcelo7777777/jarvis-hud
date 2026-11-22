@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR" class="dark" translate="no">
 <head>
 <meta charset="UTF-8" />
+<meta name="google" content="notranslate" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>ARQUITETO // Mark LXXXV · Câmara Holográfica &amp; HuggingGPT Autônomo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%2322d3ee' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%2322d3ee'/%3E%3C/svg%3E">
@@ -151,6 +152,8 @@ html, body {
   transform: translateY(-1px);
 }
 .cyber-btn:active { transform: scale(0.96); }
+button, a, label, [data-skill] { touch-action: manipulation; }
+input, textarea, select { -webkit-user-select: text; user-select: text; }
 .cyber-btn.active {
   background: linear-gradient(180deg, rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.42), rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.18));
   border-color: #ffffff;
@@ -781,7 +784,7 @@ O futuro começa agora — inscreva-se no canal</textarea>
 <div id="hud-toast" class="hidden pointer-events-none fixed top-4 left-1/2 -translate-x-1/2 z-[60] hud-panel rounded-full px-4 py-2 font-mono-tech text-xs text-white shadow-2xl"></div>
 
 <!-- Fallback se o SDK falhar -->
-<div id="fallback" class="hidden fixed bottom-4 left-4 z-[55] hud-panel rounded-2xl p-3 max-w-sm space-y-2">
+<div id="fallback" class="hidden fixed top-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] z-[55] hud-panel rounded-2xl p-3 max-w-md space-y-2">
   <div class="font-orbitron text-xs font-bold text-rose-300">MODO ALTERNATIVO</div>
   <p id="fb-msg" class="text-xs text-cyan-100/85">Não consegui iniciar a conexão direta.</p>
   <div class="flex flex-wrap gap-1.5 font-mono-tech text-[10px]">
@@ -956,7 +959,8 @@ let SDK = null;
 async function loadSDK() { if (!SDK) SDK = await import(SDK_URL); return SDK; }
 loadSDK().catch(() => {});
 
-function showFallback(msg) { $("fb-msg").textContent = msg; $("fallback").classList.remove("hidden"); }
+let fbTimer = null;
+function showFallback(msg) { $("fb-msg").textContent = msg; $("fallback").classList.remove("hidden"); clearTimeout(fbTimer); fbTimer = setTimeout(() => $("fallback").classList.add("hidden"), 15000); }
 $("btn-close-fb").onclick = () => $("fallback").classList.add("hidden");
 $("btn-widget").onclick = () => {
   if (!document.querySelector("elevenlabs-convai")) {
@@ -981,6 +985,7 @@ function onAgentMessage(text) {
 async function startSession() {
   if (!window.isSecureContext) { showFallback("O microfone só funciona em HTTPS (ou abrindo o arquivo diretamente no Chrome)."); return; }
   if (S.conv || S.status === "connecting") return;
+  $("fallback").classList.add("hidden");
   S.status = "connecting"; render(); dag("Pedindo acesso ao microfone...");
   try { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach((t) => t.stop()); }
   catch (e) { S.status = "disconnected"; render(); dag("Microfone negado.", "text-rose-300"); showFallback("O navegador bloqueou o microfone. Permita o acesso no ícone do cadeado e tente de novo."); return; }
@@ -993,10 +998,13 @@ async function startSession() {
       S.start = Date.now(); dag("Ligado ao Jarvis · sessão " + String(conversationId || "").slice(-6).toUpperCase(), "text-emerald-300");
       addChat("sys", "Conexão estabelecida.");
       setStep(2, "Agente Jarvis · ligado", true);
+      setTimeout(flushOutbox, 1200);
       const mem = LS.get("memory", []);
       if (mem.length) { try { S.conv && S.conv.sendContextualUpdate("Notas do Marcelo guardadas no painel: " + mem.join(" | ")); dag("Matriz de memória enviada como contexto (" + mem.length + ")."); } catch (e) {} }
     },
     onDisconnect: (d) => {
+      const quick = S.start && Date.now() - S.start < 4000;
+      if (quick && d && d.reason !== "user") { refused(); endSession(true); return; }
       const why = d && d.reason === "error" ? "Erro: " + (d.message || "") : d && d.reason === "agent" ? "Sessão encerrada pelo Jarvis." : "Sessão encerrada.";
       addChat("sys", why); dag(why, "text-amber-300"); endSession(true);
     },
@@ -1017,9 +1025,21 @@ async function startSession() {
   try { S.conv = await mod.Conversation.startSession({ ...opts, connectionType: "webrtc" }); }
   catch (e1) {
     try { S.conv = await mod.Conversation.startSession({ ...opts, connectionType: "websocket" }); }
-    catch (e2) { S.conv = null; S.status = "disconnected"; render(); showFallback("Não consegui ligar ao Jarvis (" + ((e2 && e2.message) || "erro desconhecido") + "). Use o link direto do ElevenLabs."); return; }
+    catch (e2) {
+      S.conv = null; S.status = "disconnected"; render();
+      if (/not available/i.test((e2 && e2.message) || "")) { refused(); return; }
+      outbox.length = 0;
+      showFallback("Não consegui ligar ao Jarvis (" + ((e2 && e2.message) || "erro desconhecido") + "). Use o link direto do ElevenLabs."); return;
+    }
   }
+  if (S.status === "disconnected") { try { S.conv.endSession(); } catch (e) {} S.conv = null; render(); return; }
   if (S.voiceMuted) { try { S.conv.setVolume({ volume: 0 }); } catch (e) {} }
+}
+function refused() {
+  outbox.length = 0;
+  const msg = "O ElevenLabs recusou a ligação: \"o agente não está disponível\". O painel está a funcionar; o problema está na conta ElevenLabs (o mais comum é terem acabado os créditos/minutos do plano). Veja o uso em elevenlabs.io → Subscription.";
+  addChat("sys", msg); dag("Jarvis indisponível (recusado pelo ElevenLabs).", "text-rose-300");
+  $("tx-text").textContent = msg; showFallback(msg); toast("⚠️ Jarvis indisponível na conta ElevenLabs", 5000);
 }
 function endSession(fromSdk) {
   const c = S.conv; S.conv = null;
@@ -1042,11 +1062,21 @@ $("btn-mute").onclick = () => {
 };
 addEventListener("beforeunload", () => { if (S.conv) try { S.conv.endSession(); } catch (e) {} });
 
-/* Enviar texto ao Jarvis (só com sessão ativa) */
+/* Enviar texto ao Jarvis. Sem sessão: liga o Jarvis e envia assim que ligar. */
+const outbox = [];
+function flushOutbox() {
+  while (outbox.length && S.conv && S.status === "connected") { const o = outbox.shift(); sendToJarvis(o.text, o.target); }
+}
 function sendToJarvis(text, target) {
   text = String(text || "").trim();
   if (!text) { toast("Escreva um comando primeiro"); return false; }
-  if (!S.conv || S.status !== "connected") { toast("⚡ Ative o Jarvis primeiro (🎙️)"); return false; }
+  if (!S.conv || S.status !== "connected") {
+    outbox.push({ text, target });
+    toast("🎙️ A ligar o Jarvis… o comando segue assim que ele ligar", 4000);
+    dag("Comando em espera até o Jarvis ligar: " + text.slice(0, 60), "text-amber-300");
+    if (!S.conv && S.status !== "connecting") startSession();
+    return true;
+  }
   try { S.conv.sendUserMessage(text); }
   catch (e) { toast("Falha ao enviar: " + e.message); return false; }
   if (target) S.pending.push(target);
@@ -1080,7 +1110,8 @@ function renderMissions() {
   LS.set("missions", S.missions);
 }
 $("auto-mission-list").onclick = (e) => {
-  const r = e.target.dataset.run, d = e.target.dataset.del;
+  const el = e.target.closest("[data-run],[data-del]"); if (!el) return;
+  const r = el.dataset.run, d = el.dataset.del;
   if (r !== undefined) { if (sendToJarvis(S.missions[+r])) { S.missions.splice(+r, 1); renderMissions(); } }
   if (d !== undefined) { S.missions.splice(+d, 1); renderMissions(); }
 };
@@ -1111,8 +1142,9 @@ function renderTasks() {
   LS.set("tasks", tasks);
 }
 function taskClick(e) {
-  const c = e.target.dataset.tchk, d = e.target.dataset.tdel;
-  if (c !== undefined) { tasks[+c].done = e.target.checked; renderTasks(); }
+  const el = e.target.closest("[data-tchk],[data-tdel]"); if (!el) return;
+  const c = el.dataset.tchk, d = el.dataset.tdel;
+  if (c !== undefined) { tasks[+c].done = el.checked; renderTasks(); }
   if (d !== undefined) { tasks.splice(+d, 1); renderTasks(); }
 }
 $("task-list").onclick = taskClick; $("desktop-tasks-preview").onclick = taskClick;
@@ -1125,7 +1157,7 @@ function renderMemory() {
   $("memory-list").innerHTML = memory.map((m, i) => '<div class="flex gap-1.5"><span class="flex-1">• ' + esc(m) + '</span><button data-mdel="' + i + '" class="text-rose-300">✕</button></div>').join("") || '<div class="text-cyan-300/40">Sem notas.</div>';
   LS.set("memory", memory);
 }
-$("memory-list").onclick = (e) => { const d = e.target.dataset.mdel; if (d !== undefined) { memory.splice(+d, 1); renderMemory(); } };
+$("memory-list").onclick = (e) => { const el = e.target.closest("[data-mdel]"); const d = el && el.dataset.mdel; if (d !== undefined) { memory.splice(+d, 1); renderMemory(); } };
 $("btn-add-memory").onclick = () => {
   const v = $("memory-input").value.trim(); if (!v) return; memory.push(v); $("memory-input").value = ""; renderMemory();
   if (S.conv) { try { S.conv.sendContextualUpdate("Nova nota do Marcelo: " + v); toast("🧬 Nota enviada ao Jarvis"); } catch (e) {} }
@@ -1168,13 +1200,15 @@ $("skills-grid").onclick = (e) => {
   const b = e.target.closest("[data-skill]"); if (!b) return;
   const s = CATALOGO_DE_HABILIDADES.find((x) => x.id === b.dataset.skill);
   const arg = $("skill-arg").value.trim();
-  const text = s.cmd + arg;
-  if (b.dataset.mode === "fill" || !arg) {
-    $("cmd-input").value = text; closeModal("modal-skills"); $("cmd-input").focus();
-    if (b.dataset.mode !== "fill") toast("Complete o comando e carregue em ENVIAR");
-    return;
+  closeModal("modal-skills");
+  if (b.dataset.mode === "fill") {
+    $("cmd-input").value = s.cmd + arg; $("cmd-input").focus();
+    toast("✎ " + s.nome + " na barra de comando. Complete e carregue em ENVIAR"); return;
   }
-  if (sendToJarvis(text)) { closeModal("modal-skills"); toast("⚡ " + s.nome + " enviado"); }
+  const text = arg ? s.cmd + arg : s.cmd.trim() + " (ainda não disse o tema: pergunta-me os detalhes que faltam)";
+  $("cmd-input").value = "";
+  if (S.conv && S.status === "connected") toast("⚡ " + s.nome + " enviado ao Jarvis");
+  sendToJarvis(text);
 };
 
 /* ==================== CRIADOR: CAMPANHA ==================== */
@@ -1196,7 +1230,6 @@ $("btn-creator-gen-all").onclick = () => {
     const a = ASK[order[i]];
     sendToJarvis(a.prompt(t), { field: a.field, label: a.label, next: () => step(i + 1) });
   };
-  if (S.status !== "connected") { toast("⚡ Ative o Jarvis primeiro (🎙️)"); return; }
   step(0); toast("🚀 A pedir os 3 textos ao Jarvis, um de cada vez");
 };
 $$(".copy-field").forEach((b) => b.onclick = () => copyText($(b.dataset.copy).value));
@@ -1309,7 +1342,7 @@ function renderAgenda() {
   $("schedule-list").innerHTML = agenda.map((a, i) => '<div class="flex items-center gap-2 rounded-lg bg-black/40 border border-cyan-500/20 px-2 py-1"><span class="text-cyan-300">' + esc(a.when.replace("T", " ")) + '</span><span class="flex-1 truncate">' + esc(a.tema || "(sem tema)") + '</span><button data-adel="' + i + '" class="text-rose-300">✕</button></div>').join("") || '<div class="text-cyan-300/40">Agenda vazia.</div>';
   LS.set("agenda", agenda);
 }
-$("schedule-list").onclick = (e) => { const d = e.target.dataset.adel; if (d !== undefined) { agenda.splice(+d, 1); renderAgenda(); } };
+$("schedule-list").onclick = (e) => { const el = e.target.closest("[data-adel]"); const d = el && el.dataset.adel; if (d !== undefined) { agenda.splice(+d, 1); renderAgenda(); } };
 $("btn-schedule-campaign").onclick = () => {
   const when = $("schedule-at").value; if (!when) return toast("Escolha a data e hora");
   agenda.push({ when, tema: $("creator-topic").value.trim() }); agenda.sort((a, b) => a.when.localeCompare(b.when)); renderAgenda(); toast("📅 Anotado na agenda");

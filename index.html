@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>J.A.R.V.I.S. — Painel de Controle</title>
+<meta name="theme-color" content="#02060d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%2300e5ff' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%2300e5ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c:#00e5ff; --c2:#36a3ff; --c3:#7df9ff; --warn:#ffb347; --bad:#ff4d6d; --ok:#3dffb0;
+  --bg:#02060d; --panel:rgba(0,40,60,.22); --line:rgba(0,229,255,.35);
+  --glow:0 0 8px rgba(0,229,255,.6),0 0 24px rgba(0,229,255,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:#cdf7ff;font-family:Rajdhani,system-ui,sans-serif;overflow:hidden}
+body{background:
+  radial-gradient(ellipse at 50% 45%,rgba(0,120,170,.28) 0%,rgba(0,30,60,.15) 35%,transparent 70%),
+  radial-gradient(ellipse at 50% 120%,rgba(0,90,140,.25),transparent 60%),var(--bg)}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.grid{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:linear-gradient(rgba(0,229,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.06) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);animation:gridmove 18s linear infinite}
+@keyframes gridmove{to{background-position:44px 44px,44px 44px}}
+.scan{position:fixed;inset:0;z-index:50;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.scan::after{content:"";position:absolute;left:0;right:0;height:120px;top:-120px;
+  background:linear-gradient(180deg,transparent,rgba(0,229,255,.07),transparent);animation:sweep 6s linear infinite}
+@keyframes sweep{to{top:100%}}
+.vignette{position:fixed;inset:0;z-index:49;pointer-events:none;box-shadow:inset 0 0 180px 40px #000}
+
+.hud{position:relative;z-index:10;height:100%;display:grid;
+  grid-template-columns:minmax(230px,300px) 1fr minmax(260px,360px);
+  grid-template-rows:auto 1fr auto;gap:14px;padding:16px 20px}
+header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border-bottom:1px solid var(--line);padding-bottom:10px;position:relative}
+header::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:30%;background:var(--c);box-shadow:var(--glow);animation:hdr 5s ease-in-out infinite alternate}
+@keyframes hdr{to{left:70%}}
+.brand{font-family:Orbitron;font-weight:800;letter-spacing:.35em;font-size:clamp(18px,2.4vw,30px);color:var(--c);text-shadow:var(--glow)}
+.brand small{display:block;font-family:Rajdhani;font-weight:500;font-size:12px;letter-spacing:.3em;color:#7fd8ea;opacity:.8}
+.clock{text-align:right;font-family:Orbitron}
+.clock .t{font-size:clamp(20px,2.6vw,34px);color:var(--c3);text-shadow:var(--glow);letter-spacing:.08em}
+.clock .d{font-family:Rajdhani;font-size:14px;letter-spacing:.18em;color:#8fdcef;text-transform:uppercase}
+
+.panel{background:var(--panel);border:1px solid var(--line);position:relative;padding:14px 14px 12px;
+  backdrop-filter:blur(3px);clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+.panel::before{content:"";position:absolute;top:0;left:0;width:40px;height:2px;background:var(--c);box-shadow:var(--glow)}
+.panel h3{font-family:Orbitron;font-weight:600;font-size:12px;letter-spacing:.28em;color:var(--c);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.panel h3 i{font-style:normal;font-family:Rajdhani;color:#5fb6c9;letter-spacing:.1em;font-size:11px}
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed rgba(0,229,255,.15);font-size:15px;letter-spacing:.06em}
+.stat:last-child{border-bottom:0}
+.stat b{font-family:Orbitron;font-weight:600;font-size:13px;letter-spacing:.12em;color:var(--c3)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:#355;vertical-align:middle;box-shadow:0 0 0 rgba(0,0,0,0)}
+.dot.on{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.dot.mid{background:var(--warn);box-shadow:0 0 10px var(--warn)}
+.dot.off{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+.dot.idle{background:#2a5866}
+.meter{height:8px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);margin-top:6px;position:relative;overflow:hidden}
+.meter span{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--c2),var(--c));box-shadow:var(--glow);transition:width .08s}
+.lbl{font-size:12px;letter-spacing:.2em;color:#6fc3d6;margin-top:8px}
+
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-height:0}
+.reactor-wrap{position:relative;width:min(56vh,46vw);aspect-ratio:1;max-width:620px}
+#reactor{width:100%;height:100%;display:block}
+.mode{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-family:Orbitron;font-size:clamp(12px,1.3vw,16px);letter-spacing:.45em;color:var(--c);text-shadow:var(--glow);white-space:nowrap}
+.controls{display:flex;gap:16px;margin-top:26px;flex-wrap:wrap;justify-content:center}
+.btn{font-family:Orbitron;font-weight:600;letter-spacing:.22em;font-size:clamp(13px,1.2vw,16px);padding:16px 34px;cursor:pointer;
+  color:#001018;background:linear-gradient(135deg,var(--c3),var(--c) 60%,var(--c2));border:0;
+  clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);box-shadow:var(--glow);transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.btn:disabled{filter:grayscale(.8) brightness(.5);cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;color:var(--c);border:1px solid var(--c);clip-path:none}
+.btn.stop{background:linear-gradient(135deg,#ff9aa9,var(--bad));color:#1a0006;box-shadow:0 0 14px rgba(255,77,109,.6)}
+.btn.small{padding:9px 16px;font-size:11px}
+.hidden{display:none!important}
+
+.log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--c) transparent}
+.log .empty{color:#4f8e9e;font-size:14px;letter-spacing:.08em;text-align:center;margin-top:30px;line-height:1.5}
+.msg{border-left:2px solid var(--c);padding:6px 10px;background:rgba(0,229,255,.05);font-size:15.5px;line-height:1.35;animation:in .35s ease-out}
+.msg.user{border-left-color:var(--warn);background:rgba(255,179,71,.06)}
+.msg .who{font-family:Orbitron;font-size:10px;letter-spacing:.25em;color:var(--c);display:block;margin-bottom:3px}
+.msg.user .who{color:var(--warn)}
+.msg .who em{font-style:normal;color:#5b9aaa;letter-spacing:.1em;margin-left:6px;font-family:Rajdhani}
+.msg.sys{border-left-color:#5b9aaa;color:#8fbac6;font-size:13.5px;background:transparent}
+@keyframes in{from{opacity:0;transform:translateX(10px)}}
+.right .panel.tx{flex:1;display:flex;flex-direction:column;min-height:0}
+
+.wx-temp{font-family:Orbitron;font-size:34px;color:var(--c3);text-shadow:var(--glow)}
+.wx-desc{font-size:15px;letter-spacing:.08em;color:#9fe3f2}
+.wx-src{font-size:11px;color:#4f8e9e;margin-top:6px;letter-spacing:.06em}
+.wx-src a{color:#5fb6c9}
+
+footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;letter-spacing:.18em;color:#4f8e9e;border-top:1px solid rgba(0,229,255,.15);padding-top:8px}
+footer a{color:#5fb6c9}
+.ticker{font-family:Orbitron;font-size:11px}
+.err{color:var(--bad)}
+#fallback{position:fixed;inset:auto 20px 70px auto;z-index:60;max-width:380px}
+#fallback .panel{background:rgba(20,0,10,.75);border-color:rgba(255,77,109,.5)}
+#fallback p{font-size:14px;line-height:1.45;margin-bottom:10px}
+#fallback .row{display:flex;gap:10px;flex-wrap:wrap}
+
+@media (max-width:980px){
+  html,body{overflow:auto}
+  .hud{grid-template-columns:1fr;grid-template-rows:auto;height:auto;min-height:100%}
+  .center{order:-1;padding:10px 0}
+  .reactor-wrap{width:min(86vw,440px)}
+  .right .panel.tx{min-height:320px}
+  .left{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+}
+@media (max-width:560px){.left{grid-template-columns:1fr}.brand{letter-spacing:.2em}}
+@media (prefers-reduced-motion:reduce){.grid,.scan::after,header::after{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="grid"></div>
+
+<div class="hud">
+  <header>
+    <div class="brand">J.A.R.V.I.S.<small>JUST A RATHER VERY INTELLIGENT SYSTEM · PAINEL DO MARCELO</small></div>
+    <div class="clock"><div class="t" id="clk">--:--:--</div><div class="d" id="dt">—</div></div>
+  </header>
+
+  <aside class="col left">
+    <div class="panel">
+      <h3>SISTEMA <i>TEMPO REAL</i></h3>
+      <div class="stat"><span><span class="dot idle" id="dConn"></span>Conexão</span><b id="sConn">DESCONECTADO</b></div>
+      <div class="stat"><span><span class="dot idle" id="dMic"></span>Microfone</span><b id="sMic">INATIVO</b></div>
+      <div class="stat"><span><span class="dot idle" id="dMode"></span>Modo</span><b id="sMode">EM ESPERA</b></div>
+      <div class="stat"><span>Tempo de sessão</span><b id="sTimer">00:00</b></div>
+      <div class="stat"><span>Mensagens</span><b id="sCount">0</b></div>
+      <div class="stat"><span>Rede</span><b id="sNet">—</b></div>
+    </div>
+    <div class="panel">
+      <h3>ÁUDIO <i>NÍVEIS AO VIVO</i></h3>
+      <div class="lbl">ENTRADA · VOCÊ</div>
+      <div class="meter"><span id="mIn"></span></div>
+      <div class="lbl">SAÍDA · JARVIS</div>
+      <div class="meter"><span id="mOut"></span></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost small" id="btnMute" disabled>SILENCIAR MIC</button>
+      </div>
+    </div>
+    <div class="panel hidden" id="wxPanel">
+      <h3>LISBOA <i>OPEN-METEO</i></h3>
+      <div class="wx-temp" id="wxT">--°</div>
+      <div class="wx-desc" id="wxD">—</div>
+      <div class="stat"><span>Vento</span><b id="wxW">—</b></div>
+      <div class="stat"><span>Umidade</span><b id="wxH">—</b></div>
+      <div class="wx-src" id="wxS"></div>
+    </div>
+  </aside>
+
+  <main class="center">
+    <div class="reactor-wrap">
+      <canvas id="reactor" aria-label="Núcleo do Jarvis"></canvas>
+      <div class="mode" id="modeLbl">SISTEMA EM ESPERA</div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btnStart">ATIVAR JARVIS</button>
+      <button class="btn stop hidden" id="btnStop">ENCERRAR</button>
+    </div>
+  </main>
+
+  <aside class="col right">
+    <div class="panel tx">
+      <h3>TRANSCRIÇÃO <i id="convId">SEM SESSÃO</i></h3>
+      <div class="log" id="log"><div class="empty" id="empty">Toque em <b>ATIVAR JARVIS</b> e permita o microfone.<br>A conversa aparece aqui em tempo real.</div></div>
+    </div>
+  </aside>
+
+  <footer>
+    <span class="ticker" id="ticker">NÚCLEO PRONTO · AGUARDANDO COMANDO</span>
+    <span>Não funcionou? <a href="https://elevenlabs.io/app/talk-to?agent_id=agent_2601m81gpwvge0689sd4jkyjv8fn" target="_blank" rel="noopener">Abrir o Jarvis no ElevenLabs</a></span>
+  </footer>
+</div>
+
+<div id="fallback" class="hidden">
+  <div class="panel">
+    <h3>MODO ALTERNATIVO</h3>
+    <p id="fbMsg">Não consegui iniciar a conexão direta.</p>
+    <div class="row">
+      <a class="btn small" href="https://elevenlabs.io/app/talk-to?agent_id=agent_2601m81gpwvge0689sd4jkyjv8fn" target="_blank" rel="noopener" style="text-decoration:none">ABRIR NO ELEVENLABS</a>
+      <button class="btn ghost small" id="btnWidget">USAR WIDGET</button>
+      <button class="btn ghost small" id="btnCloseFb">FECHAR</button>
+    </div>
+  </div>
+</div>
+
+<div class="scan"></div><div class="vignette"></div>
+
+<script type="module">
+const AGENT_ID = "agent_2601m81gpwvge0689sd4jkyjv8fn";
+const TZ = "Europe/Lisbon";
+const SDK_URL = "https://esm.sh/@elevenlabs/client@1.37.1";
+const $ = id => document.getElementById(id);
+
+/* ---------- state ---------- */
+const S = { status:"disconnected", mode:"idle", conv:null, start:0, count:0, inV:0, outV:0, muted:false, micOK:null };
+
+/* ---------- clock (Lisbon) ---------- */
+const fT = new Intl.DateTimeFormat("pt-BR",{timeZone:TZ,hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+const fD = new Intl.DateTimeFormat("pt-BR",{timeZone:TZ,weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+function tick(){
+  const n=new Date();
+  $("clk").textContent=fT.format(n);
+  $("dt").textContent=fD.format(n)+" · LISBOA";
+  if(S.start){const s=Math.floor((Date.now()-S.start)/1000);$("sTimer").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+  $("sNet").textContent=navigator.onLine?"ONLINE":"OFFLINE";
+}
+tick(); setInterval(tick,1000);
+addEventListener("online",tick); addEventListener("offline",tick);
+
+/* ---------- weather (open-meteo, keyless) ---------- */
+const WMO={0:"Céu limpo",1:"Predominantemente limpo",2:"Parcialmente nublado",3:"Nublado",45:"Neblina",48:"Neblina com geada",51:"Garoa fraca",53:"Garoa",55:"Garoa forte",56:"Garoa congelante",57:"Garoa congelante forte",61:"Chuva fraca",63:"Chuva",65:"Chuva forte",66:"Chuva congelante",67:"Chuva congelante forte",71:"Neve fraca",73:"Neve",75:"Neve forte",77:"Grãos de neve",80:"Pancadas fracas",81:"Pancadas de chuva",82:"Pancadas fortes",85:"Pancadas de neve",86:"Pancadas de neve fortes",95:"Trovoada",96:"Trovoada com granizo",99:"Trovoada com granizo forte"};
+async function weather(){
+  try{
+    const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=38.7223&longitude=-9.1393&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Europe%2FLisbon");
+    if(!r.ok) throw 0; const j=await r.json(); const c=j.current; if(!c) throw 0;
+    $("wxT").textContent=Math.round(c.temperature_2m)+"°C";
+    $("wxD").textContent=WMO[c.weather_code]||"—";
+    $("wxW").textContent=Math.round(c.wind_speed_10m)+" KM/H";
+    $("wxH").textContent=Math.round(c.relative_humidity_2m)+"%";
+    $("wxS").innerHTML='Atualizado '+String(c.time).slice(11,16)+' (Lisboa) · <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>';
+    $("wxPanel").classList.remove("hidden");
+  }catch(e){ $("wxPanel").classList.add("hidden"); }
+}
+weather(); setInterval(weather,15*60*1000);
+
+/* ---------- UI helpers ---------- */
+function setDot(id,cls){const d=$(id);d.className="dot "+cls;}
+function ticker(t){$("ticker").textContent=t;}
+const STATUS_PT={disconnected:"DESCONECTADO",connecting:"CONECTANDO",connected:"CONECTADO",disconnecting:"DESCONECTANDO"};
+function renderStatus(){
+  $("sConn").textContent=STATUS_PT[S.status]||S.status.toUpperCase();
+  setDot("dConn",S.status==="connected"?"on":S.status==="disconnected"?"idle":"mid");
+  const live=S.status==="connected";
+  $("btnStart").classList.toggle("hidden",live||S.status==="connecting");
+  $("btnStop").classList.toggle("hidden",!(live||S.status==="connecting"));
+  $("btnMute").disabled=!live;
+  if(S.micOK===true&&live){$("sMic").textContent=S.muted?"SILENCIADO":"ATIVO";setDot("dMic",S.muted?"mid":"on");}
+  else if(S.micOK===false){$("sMic").textContent="BLOQUEADO";setDot("dMic","off");}
+  else {$("sMic").textContent="INATIVO";setDot("dMic","idle");}
+  let m="EM ESPERA",lbl="SISTEMA EM ESPERA",dc="idle";
+  if(S.status==="connecting"){m="INICIANDO";lbl="INICIALIZANDO NÚCLEO";dc="mid";}
+  else if(live&&S.mode==="speaking"){m="FALANDO";lbl="JARVIS FALANDO";dc="on";}
+  else if(live){m="OUVINDO";lbl="OUVINDO VOCÊ";dc="on";}
+  $("sMode").textContent=m;$("modeLbl").textContent=lbl;setDot("dMode",dc);
+}
+function addMsg(role,text,cls){
+  const e=$("empty"); if(e) e.remove();
+  const d=document.createElement("div"); d.className="msg "+(cls||role);
+  const t=fT.format(new Date()).slice(0,5);
+  const who=document.createElement("span"); who.className="who";
+  who.innerHTML=(role==="user"?"VOCÊ":role==="agent"?"JARVIS":"SISTEMA")+"<em>"+t+"</em>";
+  const p=document.createElement("div"); p.textContent=text;
+  d.append(who,p); $("log").append(d); $("log").scrollTop=$("log").scrollHeight;
+}
+
+/* ---------- SDK ---------- */
+let SDK=null;
+async function loadSDK(){ if(!SDK) SDK=await import(SDK_URL); return SDK; }
+loadSDK().catch(()=>{}); // preload, errors handled on click
+
+function showFallback(msg){ $("fbMsg").textContent=msg; $("fallback").classList.remove("hidden"); }
+$("btnCloseFb").onclick=()=>$("fallback").classList.add("hidden");
+$("btnWidget").onclick=()=>{
+  if(!document.querySelector("elevenlabs-convai")){
+    const w=document.createElement("elevenlabs-convai"); w.setAttribute("agent-id",AGENT_ID); document.body.append(w);
+    const s=document.createElement("script"); s.src="https://unpkg.com/@elevenlabs/convai-widget-embed"; s.async=true; document.body.append(s);
+  }
+  $("fallback").classList.add("hidden"); ticker("WIDGET ELEVENLABS CARREGADO · CANTO INFERIOR DIREITO");
+};
+
+async function start(){
+  if(!window.isSecureContext){ showFallback("O microfone só funciona em HTTPS. Abra esta página por um link https ou use o ElevenLabs."); return; }
+  S.status="connecting"; renderStatus(); ticker("SOLICITANDO ACESSO AO MICROFONE…");
+  try{ const st=await navigator.mediaDevices.getUserMedia({audio:true}); st.getTracks().forEach(t=>t.stop()); S.micOK=true; }
+  catch(e){ S.micOK=false; S.status="disconnected"; renderStatus(); ticker("MICROFONE NEGADO");
+    showFallback("O navegador bloqueou o microfone. Permita o acesso no ícone do cadeado e tente de novo."); return; }
+  let mod; try{ ticker("CARREGANDO NÚCLEO DE VOZ…"); mod=await loadSDK(); }
+  catch(e){ S.status="disconnected"; renderStatus(); ticker("FALHA AO CARREGAR O SDK");
+    showFallback("Não consegui carregar o módulo de voz do ElevenLabs. Use o link direto ou o widget."); return; }
+  const opts={
+    agentId:AGENT_ID,
+    onConnect:({conversationId})=>{ S.start=Date.now(); $("convId").textContent="SESSÃO "+(conversationId||"").slice(-6).toUpperCase(); addMsg("sys","Conexão estabelecida.","sys"); ticker("JARVIS ONLINE · PODE FALAR"); },
+    onDisconnect:(d)=>{ const why=d&&d.reason==="error"?"Erro: "+(d.message||""):d&&d.reason==="agent"?"Sessão encerrada pelo Jarvis.":"Sessão encerrada."; addMsg("sys",why,"sys"); end(true); },
+    onStatusChange:({status})=>{ S.status=status; renderStatus(); },
+    onModeChange:({mode})=>{ S.mode=mode; renderStatus(); },
+    onMessage:(m)=>{ const role=m.role||(m.source==="user"?"user":"agent"); if(!m.message) return; S.count++; $("sCount").textContent=S.count; addMsg(role,m.message); },
+    onError:(msg)=>{ addMsg("sys","Erro: "+msg,"sys"); ticker("ERRO DE SESSÃO"); }
+  };
+  try{ S.conv=await mod.Conversation.startSession({...opts,connectionType:"webrtc"}); }
+  catch(e1){
+    try{ S.conv=await mod.Conversation.startSession({...opts,connectionType:"websocket"}); }
+    catch(e2){ S.status="disconnected"; renderStatus(); ticker("FALHA NA CONEXÃO");
+      showFallback("Não consegui conectar ao Jarvis ("+((e2&&e2.message)||"erro desconhecido")+"). Use o link direto do ElevenLabs."); return; }
+  }
+}
+function end(fromSdk){
+  const c=S.conv; S.conv=null;
+  if(c&&!fromSdk){ try{c.endSession();}catch(e){} }
+  S.status="disconnected"; S.mode="idle"; S.start=0; S.muted=false; if(S.micOK) S.micOK=null;
+  $("btnMute").textContent="SILENCIAR MIC"; renderStatus(); ticker("SESSÃO ENCERRADA · NÚCLEO EM ESPERA");
+}
+$("btnStart").onclick=start;
+$("btnStop").onclick=()=>end(false);
+$("btnMute").onclick=()=>{ if(!S.conv) return; S.muted=!S.muted; try{S.conv.setMicMuted(S.muted);}catch(e){} $("btnMute").textContent=S.muted?"ATIVAR MIC":"SILENCIAR MIC"; renderStatus(); };
+addEventListener("beforeunload",()=>{ if(S.conv) try{S.conv.endSession();}catch(e){} });
+renderStatus();
+
+/* ---------- background particles ---------- */
+const fx=$("fx"), fc=fx.getContext("2d"); let W,H,P=[];
+function rs(){ const dpr=Math.min(devicePixelRatio||1,2); W=fx.width=innerWidth*dpr; H=fx.height=innerHeight*dpr; fx.style.width=innerWidth+"px"; fx.style.height=innerHeight+"px";
+  const n=Math.min(140,Math.floor(innerWidth*innerHeight/9000)); P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+.3,vx:(Math.random()-.5)*.25,vy:-Math.random()*.35-.05,a:Math.random()*.6+.2})); }
+rs(); addEventListener("resize",()=>{rs();rr();});
+
+/* ---------- reactor ---------- */
+const rc=$("reactor"), rx=rc.getContext("2d"); let R=0;
+function rr(){ const dpr=Math.min(devicePixelRatio||1,2); const b=rc.getBoundingClientRect(); rc.width=b.width*dpr; rc.height=b.height*dpr; R=rc.width/2; }
+rr();
+const spec=new Array(96).fill(0);
+function arc(cx,cy,r,a0,a1,w,col,blur){ rx.beginPath(); rx.arc(cx,cy,r,a0,a1); rx.lineWidth=w; rx.strokeStyle=col; rx.shadowBlur=blur||0; rx.shadowColor=col; rx.stroke(); }
+function draw(t){
+  /* volumes */
+  let iv=0,ov=0;
+  if(S.conv&&S.status==="connected"){ try{iv=S.conv.getInputVolume()||0;ov=S.conv.getOutputVolume()||0;}catch(e){} }
+  S.inV+= (iv-S.inV)*.25; S.outV+=(ov-S.outV)*.25;
+  $("mIn").style.width=Math.min(100,S.inV*140)+"%"; $("mOut").style.width=Math.min(100,S.outV*140)+"%";
+  const live=S.status==="connected", speaking=live&&S.mode==="speaking";
+  const lvl=Math.min(1,(speaking?S.outV:S.inV)*1.6);
+  const idle=.5+.5*Math.sin(t/900);
+  const energy=live?Math.max(.15,lvl):(S.status==="connecting"?.35+.25*Math.sin(t/120):.08+.06*idle);
+  const hue=speaking?"0,229,255":live?"125,249,255":"0,180,230";
+  const C=a=>`rgba(${hue},${a})`;
+
+  /* particles */
+  fc.clearRect(0,0,W,H);
+  for(const p of P){ p.x+=p.vx*(1+energy*3); p.y+=p.vy*(1+energy*3); if(p.y<0){p.y=H;p.x=Math.random()*W;} if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    fc.beginPath(); fc.arc(p.x,p.y,p.r*(devicePixelRatio||1),0,7); fc.fillStyle=`rgba(0,229,255,${p.a*(.5+energy)})`; fc.fill(); }
+
+  /* reactor */
+  const cx=R,cy=R; rx.clearRect(0,0,rc.width,rc.height); rx.save();
+  const s=t/1000;
+  /* outer tick ring */
+  rx.save(); rx.translate(cx,cy); rx.rotate(s*.08);
+  for(let i=0;i<120;i++){ const a=i/120*Math.PI*2, long=i%10===0; rx.beginPath();
+    rx.moveTo(Math.cos(a)*R*.96,Math.sin(a)*R*.96); rx.lineTo(Math.cos(a)*R*(long?.90:.93),Math.sin(a)*R*(long?.90:.93));
+    rx.strokeStyle=C(long?.8:.35); rx.lineWidth=long?2:1; rx.stroke(); }
+  rx.restore();
+  /* segmented rings */
+  const rings=[[.86,-.25,6,.05,3],[.78,.4,3,.12,2],[.70,-.6,12,.02,4]];
+  rings.forEach(([rad,sp,seg,gap,w],k)=>{ const off=s*sp*(1+energy*2);
+    for(let i=0;i<seg;i++){ const a0=off+i/seg*Math.PI*2, a1=a0+(Math.PI*2/seg)*(1-gap*seg/ (k===1?1:2)); arc(cx,cy,R*rad,a0,Math.max(a0+.05,a1),w*(rc.width/600),C(.35+energy*.5),10); } });
+  /* audio spectrum ring (driven by real volume) */
+  for(let i=0;i<spec.length;i++){ const target=live? lvl*(.35+.65*Math.abs(Math.sin(i*1.7+s*6*(.5+lvl)))) : .04*idle; spec[i]+= (target-spec[i])*.2; }
+  rx.save(); rx.translate(cx,cy);
+  for(let i=0;i<spec.length;i++){ const a=i/spec.length*Math.PI*2-Math.PI/2, r0=R*.56, r1=r0+R*.12*spec[i]+2;
+    rx.beginPath(); rx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0); rx.lineTo(Math.cos(a)*r1,Math.sin(a)*r1);
+    rx.strokeStyle=C(.5+spec[i]*.5); rx.lineWidth=Math.max(2,R*.012); rx.shadowBlur=12; rx.shadowColor=C(1); rx.stroke(); }
+  rx.restore();
+  /* triangle (Mark VI style) */
+  rx.save(); rx.translate(cx,cy); rx.rotate(-s*.15);
+  rx.beginPath(); for(let i=0;i<3;i++){ const a=i/3*Math.PI*2-Math.PI/2; rx[i?"lineTo":"moveTo"](Math.cos(a)*R*.44,Math.sin(a)*R*.44);} rx.closePath();
+  rx.strokeStyle=C(.55+energy*.4); rx.lineWidth=R*.018; rx.shadowBlur=18; rx.shadowColor=C(1); rx.stroke();
+  rx.restore();
+  /* coils */
+  rx.save(); rx.translate(cx,cy); rx.rotate(s*.3);
+  for(let i=0;i<10;i++){ const a=i/10*Math.PI*2; rx.save(); rx.rotate(a); rx.fillStyle=C(.18+energy*.35); rx.shadowBlur=8; rx.shadowColor=C(1);
+    rx.fillRect(R*.30,-R*.035,R*.12,R*.07); rx.restore(); }
+  rx.restore();
+  arc(cx,cy,R*.47,0,Math.PI*2,R*.008,C(.6),14);
+  arc(cx,cy,R*.29,0,Math.PI*2,R*.01,C(.7),14);
+  /* core glow */
+  const pulse=.55+energy*.9;
+  const g=rx.createRadialGradient(cx,cy,0,cx,cy,R*.30*pulse+R*.05);
+  g.addColorStop(0,"rgba(255,255,255,.95)"); g.addColorStop(.25,C(.9)); g.addColorStop(.6,C(.25)); g.addColorStop(1,"rgba(0,0,0,0)");
+  rx.shadowBlur=0; rx.fillStyle=g; rx.beginPath(); rx.arc(cx,cy,R*.36,0,Math.PI*2); rx.fill();
+  /* text */
+  rx.fillStyle=C(.85); rx.font=`600 ${Math.round(R*.055)}px Orbitron, sans-serif`; rx.textAlign="center"; rx.shadowBlur=8; rx.shadowColor=C(1);
+  rx.fillText(live?(speaking?"SAÍDA "+Math.round(S.outV*100)+"%":"ENTRADA "+Math.round(S.inV*100)+"%"):(S.status==="connecting"?"SINCRONIZANDO":"OFFLINE"),cx,cy+R*.75);
+  rx.restore();
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

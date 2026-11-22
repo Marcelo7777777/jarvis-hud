@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>ARQUITETO // Mark LXXXV · Câmara Holográfica &amp; HuggingGPT Autônomo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%2322d3ee' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%2322d3ee'/%3E%3C/svg%3E">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Fontes Futuristas -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --hud-r: 34;
+  --hud-g: 211;
+  --hud-b: 238;
+  --hud-primary: rgb(var(--hud-r), var(--hud-g), var(--hud-b));
+  --hud-glow: rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.55);
+  --hud-soft: rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.14);
+  --hud-border: rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.34);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #02060d;
+  color: #e2f5ff;
+  font-family: "Inter", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.font-orbitron { font-family: "Orbitron", sans-serif; }
+.font-mono-tech { font-family: "JetBrains Mono", monospace; }
+
+/* Vinheta do Visor Mark LXXXV */
+.visor-vignette {
+  background: radial-gradient(circle at center, transparent 38%, rgba(1, 5, 14, 0.88) 100%);
+  pointer-events: none;
+}
+
+/* Malha Hexagonal Holográfica + Scanlines CRT */
+.hud-hex-grid {
+  background-image:
+    radial-gradient(rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.03) 1px, transparent 1px);
+  background-size: 28px 28px, 56px 56px, 56px 56px;
+  pointer-events: none;
+}
+
+.hud-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.035) 3px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  pointer-events: none;
+}
+
+/* Painel HUD Translúcido com Brilho Laser e Cantos Táticos */
+.hud-panel {
+  position: relative;
+  background: linear-gradient(155deg, rgba(5, 16, 34, 0.84), rgba(2, 8, 20, 0.94) 60%, rgba(6, 20, 40, 0.88));
+  border: 1px solid var(--hud-border);
+  box-shadow:
+    0 0 28px rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.16),
+    inset 0 0 24px rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.hud-panel::before,
+.hud-panel::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--hud-primary);
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px var(--hud-glow));
+}
+.hud-panel::before {
+  top: -1px; left: -1px;
+  border-top: 2.5px solid var(--hud-primary);
+  border-left: 2.5px solid var(--hud-primary);
+  border-top-left-radius: 14px;
+}
+.hud-panel::after {
+  bottom: -1px; right: -1px;
+  border-bottom: 2.5px solid var(--hud-primary);
+  border-right: 2.5px solid var(--hud-primary);
+  border-bottom-right-radius: 14px;
+}
+
+/* Faixa Laser Animada no Topo dos Painéis */
+@keyframes laserScan {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.laser-line {
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--hud-primary), #ffffff, var(--hud-primary), transparent);
+  background-size: 200% 100%;
+  animation: laserScan 4.5s linear infinite;
+  opacity: 0.75;
+}
+
+/* Mira Tática nos Cantos da Câmara */
+.chamber-bracket {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 3;
+  border-color: rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.7);
+  filter: drop-shadow(0 0 8px var(--hud-glow));
+}
+
+.hud-glow-text {
+  color: var(--hud-primary);
+  text-shadow: 0 0 14px var(--hud-glow), 0 0 28px rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.25);
+}
+
+/* Botões Glass-Cyber Ultra-Luminosos */
+.cyber-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.20), rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.06));
+  border: 1px solid var(--hud-border);
+  color: #ecfeff;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 12px rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+.cyber-btn:hover {
+  background: linear-gradient(180deg, rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.34), rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.14));
+  border-color: var(--hud-primary);
+  box-shadow: 0 0 20px var(--hud-glow), inset 0 0 10px rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.25);
+  transform: translateY(-1px);
+}
+.cyber-btn:active { transform: scale(0.96); }
+.cyber-btn.active {
+  background: linear-gradient(180deg, rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.42), rgba(var(--hud-r), var(--hud-g), var(--hud-b), 0.18));
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 22px var(--hud-glow), inset 0 0 12px rgba(255, 255, 255, 0.22);
+}
+.cyber-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* Rotação Suave para Anéis do Reator */
+@keyframes spinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+.spin-reverse { animation: spinReverse 14s linear infinite; }
+
+/* Varredura holográfica do humanoide */
+@keyframes holoSweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  20% { opacity: 0.45; }
+  80% { opacity: 0.45; }
+  100% { transform: translateY(260%); opacity: 0; }
+}
+.holo-beam {
+  background: linear-gradient(180deg, transparent, var(--hud-glow), transparent);
+  animation: holoSweep 4.2s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Pulso de microfone ativo */
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
+}
+.mic-live {
+  background: rgba(244, 63, 94, 0.35) !important;
+  border-color: #fb7185 !important;
+  animation: micPulse 1.2s infinite;
+}
+
+/* Câmera holográfica dentro da câmara */
+#cam-video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  transform: scaleX(-1);
+  filter: grayscale(1) contrast(1.25) brightness(0.85) sepia(1) hue-rotate(150deg) saturate(2.2);
+  opacity: 0.38; mix-blend-mode: screen;
+}
+#reactor-canvas { position: relative; z-index: 1; }
+
+/* Barra de rolagem futurista */
+.hud-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+.hud-scroll::-webkit-scrollbar-track { background: rgba(2, 8, 18, 0.4); }
+.hud-scroll::-webkit-scrollbar-thumb { background: var(--hud-border); border-radius: 999px; }
+.hud-scroll { scrollbar-width: thin; scrollbar-color: var(--hud-border) transparent; }
+
+/* Navegação responsiva por abas em telas pequenas */
+@media (max-width: 1023px) {
+  html, body { overflow: auto; }
+  .hud-pane { display: none !important; }
+  .hud-pane.mobile-active { display: flex !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .laser-line, .holo-beam, .spin-reverse { animation: none; }
+}
+</style>
+</head>
+<body class="relative select-none">
+
+<!-- Fundo: Constelação Neural + Malha Hexagonal + Scanlines -->
+<canvas id="bg-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-none"></canvas>
+<div class="hud-hex-grid fixed inset-0 z-0"></div>
+<div class="hud-scanlines fixed inset-0 z-0"></div>
+<div class="visor-vignette fixed inset-0 z-0"></div>
+
+<!-- ==================== OVERLAY DE ARRANQUE ==================== -->
+<div id="boot-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-2xl">
+  <div class="hud-panel rounded-3xl max-w-md w-full p-6 sm:p-8 text-center flex flex-col items-center gap-4 overflow-hidden">
+    <div class="laser-line w-full -mt-2"></div>
+    <div class="font-mono-tech text-[11px] tracking-[0.28em] text-cyan-300/85 uppercase">
+      Indústrias Stark // Mark LXXXV · Núcleo Quântico
+    </div>
+
+    <!-- Emblema Reator Arc Multi-Anel -->
+    <div class="relative w-28 h-28 rounded-full flex items-center justify-center border-2 border-cyan-400/70 shadow-[0_0_45px_rgba(34,211,238,0.5)]">
+      <div class="absolute inset-1.5 rounded-full border border-dashed border-cyan-300/80 animate-spin" style="animation-duration:8s;"></div>
+      <div class="absolute inset-4 rounded-full border-2 border-dotted border-sky-400/70 spin-reverse"></div>
+      <div class="w-11 h-11 rounded-full bg-gradient-to-br from-amber-100 via-orange-500 to-red-600 shadow-[0_0_32px_#ff7b00] animate-pulse"></div>
+    </div>
+
+    <h1 class="font-orbitron font-black text-3xl sm:text-4xl tracking-[0.22em] hud-glow-text">ARQUITETO</h1>
+
+    <!-- Mini-Badges (apenas fatos reais) -->
+    <div class="flex flex-wrap justify-center gap-1.5 font-mono-tech text-[9px]">
+      <span class="px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/35 text-cyan-200">⚡ AGENTE ELEVENLABS</span>
+      <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-200">🧬 <span id="boot-skill-count">0</span> HABILIDADES</span>
+      <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-200">🤗 HUGGINGGPT</span>
+      <span class="px-2 py-0.5 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/35 text-fuchsia-200">🎙️ VOZ JARVIS</span>
+    </div>
+
+    <p class="text-xs sm:text-sm text-cyan-100/80 leading-relaxed">
+      <strong>Câmara Holográfica Humanoide</strong> • Voz em tempo real com o <strong>Jarvis</strong> • Fluxo inspirado no <strong>HuggingGPT</strong> (arXiv:2303.17580) • Central de Criação • Player de Música.
+    </p>
+
+    <button id="btn-boot" class="cyber-btn w-full py-3.5 px-6 rounded-2xl font-orbitron font-bold text-sm tracking-[0.18em] uppercase">
+      ⚡ INICIALIZAR ARQUITETO
+    </button>
+
+    <div class="font-mono-tech text-[10px] text-cyan-300/65">
+      Toque para abrir o painel. A voz do Jarvis só liga quando você tocar em 🎙️ ou no humanoide.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== COCKPIT PRINCIPAL ==================== -->
+<div id="hud-root" class="relative z-10 w-full h-full flex flex-col p-2 sm:p-3 gap-2 opacity-0 transition-opacity duration-500">
+
+  <!-- CABEÇALHO SUPERIOR -->
+  <header class="hud-panel rounded-2xl px-3 py-2 flex flex-col gap-1.5 shrink-0">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <!-- Identidade + Estado real -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="relative w-3 h-3 shrink-0 flex items-center justify-center">
+          <span id="hdr-ping" class="absolute inset-0 rounded-full bg-slate-400/40"></span>
+          <span id="hdr-dot" class="relative w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-orbitron font-black text-sm sm:text-base tracking-[0.2em] hud-glow-text">ARQUITETO</span>
+            <span class="hidden sm:inline font-mono-tech text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40 text-cyan-200">MK-LXXXV ULTRA</span>
+            <span class="hidden xl:inline font-mono-tech text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/30 text-emerald-300">LINK <strong id="hdr-status">DESCONECTADO</strong></span>
+            <span class="hidden xl:inline font-mono-tech text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-sky-200">SESSÃO <strong id="hdr-timer">00:00</strong></span>
+          </div>
+          <div class="font-mono-tech text-[9px] text-cyan-200/75 truncate">
+            CÂMARA HUMANOIDE • JARVIS (ELEVENLABS) • LISBOA <span id="hud-clock">--:--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Ferramentas Rápidas -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button id="btn-auto-toggle" class="cyber-btn active px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold" title="Envia automaticamente a próxima missão da fila quando o Jarvis termina de falar">🤖 AUTO: ON</button>
+        <button id="btn-open-skills" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">🧩 HABILIDADES <span id="skills-count-badge">0</span></button>
+        <button id="btn-open-creator" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">🎬 CRIADOR</button>
+        <button id="btn-open-capcut" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✂️ CAPCUT</button>
+        <button id="btn-open-music" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">📺 YOUTUBE</button>
+        <button id="btn-open-image" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">🎨 IMAGEM</button>
+        <button id="btn-open-studio" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">💻 ESTÚDIO</button>
+        <button id="btn-camera" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Ligar a câmera na câmara holográfica (opcional)">📷 CÂMERA</button>
+        <button id="btn-color-cycle" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Mudar cor do painel">🎨 COR</button>
+        <button id="btn-prisma-toggle" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Modo Camaleão Prisma">🌈 PRISMA</button>
+        <button id="btn-mute" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Silenciar / Ativar Voz JARVIS">🔊</button>
+      </div>
+    </div>
+    <div class="laser-line w-full rounded-full"></div>
+  </header>
+
+  <!-- ABAS MOBILE -->
+  <nav class="lg:hidden grid grid-cols-4 gap-1.5 shrink-0">
+    <button data-pane="pane-core" class="mobile-tab cyber-btn active py-2 rounded-xl font-orbitron text-[10px] font-bold">HUMANOIDE</button>
+    <button data-pane="pane-hg" class="mobile-tab cyber-btn py-2 rounded-xl font-orbitron text-[10px] font-bold">HUGGINGGPT</button>
+    <button data-pane="pane-chat" class="mobile-tab cyber-btn py-2 rounded-xl font-orbitron text-[10px] font-bold">CHAT</button>
+    <button data-pane="pane-sys" class="mobile-tab cyber-btn py-2 rounded-xl font-orbitron text-[10px] font-bold">SISTEMAS</button>
+  </nav>
+
+  <!-- GRADE PRINCIPAL DE 3 COLUNAS (DESKTOP) / 4 ABAS (MOBILE) -->
+  <main class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-hidden">
+
+    <!-- COLUNA ESQUERDA: Pipeline HuggingGPT + Fila Autônoma -->
+    <section id="pane-hg" class="hud-pane hud-panel rounded-2xl p-3 lg:col-span-3 flex flex-col gap-2 min-h-0 overflow-hidden">
+      <div class="flex items-center justify-between shrink-0">
+        <h2 class="font-orbitron font-bold text-xs tracking-wider hud-glow-text">🤗 NÚCLEO HUGGINGGPT</h2>
+        <span id="hg-status-badge" class="font-mono-tech text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">EM ESPERA</span>
+      </div>
+
+      <!-- 4 Fases (mapeadas para eventos reais da sessão) -->
+      <div class="grid grid-cols-2 gap-1.5 shrink-0 font-mono-tech text-[10px]">
+        <div id="hg-step-1" class="p-2 rounded-xl border border-cyan-500/20 bg-black/35">
+          <div class="text-cyan-400 font-bold">1. PLANEJAMENTO</div>
+          <div id="hg-step-1-txt" class="text-[9px] text-cyan-100/70 truncate">Aguardando ordem</div>
+        </div>
+        <div id="hg-step-2" class="p-2 rounded-xl border border-cyan-500/20 bg-black/35">
+          <div class="text-cyan-400 font-bold">2. MODELO</div>
+          <div id="hg-step-2-txt" class="text-[9px] text-cyan-100/70 truncate">Agente Jarvis</div>
+        </div>
+        <div id="hg-step-3" class="p-2 rounded-xl border border-cyan-500/20 bg-black/35">
+          <div class="text-cyan-400 font-bold">3. EXECUÇÃO</div>
+          <div id="hg-step-3-txt" class="text-[9px] text-cyan-100/70 truncate">Pronto</div>
+        </div>
+        <div id="hg-step-4" class="p-2 rounded-xl border border-cyan-500/20 bg-black/35">
+          <div class="text-cyan-400 font-bold">4. SÍNTESE</div>
+          <div id="hg-step-4-txt" class="text-[9px] text-cyan-100/70 truncate">Voz JARVIS</div>
+        </div>
+      </div>
+
+      <!-- Log de eventos reais -->
+      <div class="flex-1 min-h-0 flex flex-col gap-1">
+        <div class="font-mono-tech text-[9px] text-cyan-300/70 uppercase">Gráfico de Execução (eventos da sessão)</div>
+        <div id="hg-dag-log" class="hud-scroll flex-1 overflow-y-auto rounded-xl bg-black/45 border border-cyan-500/20 p-2 font-mono-tech text-[10px] space-y-1.5">
+          <div class="text-cyan-300/70">[BOOT] Painel carregado. Jarvis desconectado.</div>
+        </div>
+      </div>
+
+      <!-- Fila de Missões Autônomas -->
+      <div class="shrink-0 flex flex-col gap-1.5 pt-1 border-t border-cyan-500/20">
+        <div class="flex items-center justify-between font-mono-tech text-[10px]">
+          <span class="text-cyan-300 font-bold">🤖 FILA AUTÔNOMA</span>
+          <span id="auto-queue-count" class="text-cyan-200/70">0 missões</span>
+        </div>
+        <div class="flex gap-1.5">
+          <input id="auto-mission-input" type="text" placeholder="Adicionar missão para o Jarvis..." class="flex-1 min-w-0 bg-black/50 border border-cyan-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-400" />
+          <button id="btn-add-mission" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-xs font-bold">+</button>
+        </div>
+        <div id="auto-mission-list" class="hud-scroll max-h-20 overflow-y-auto space-y-1 font-mono-tech text-[10px]"></div>
+      </div>
+    </section>
+
+    <!-- COLUNA CENTRAL: Câmara Holográfica Humanoide + Onda + Comando -->
+    <section id="pane-core" class="hud-pane mobile-active hud-panel rounded-2xl p-3 lg:col-span-6 flex flex-col gap-2 min-h-0 overflow-hidden">
+      <!-- Barra de telemetria (dados reais) -->
+      <div class="flex items-center justify-between font-mono-tech text-[10px] text-cyan-200/75 shrink-0 gap-2">
+        <span class="truncate">LINK <strong id="tel-synapses" class="hud-glow-text">DESCONECTADO</strong> · MODO <strong id="tel-route" class="hud-glow-text">EM ESPERA</strong></span>
+        <span class="shrink-0">PROTOCOLO <strong id="tel-theme" class="hud-glow-text">CIANO STARK</strong></span>
+      </div>
+
+      <!-- Câmara Holográfica + Busto Humanoide -->
+      <div id="reactor-wrap" class="relative w-full flex-1 min-h-[240px] flex items-center justify-center cursor-pointer rounded-2xl border border-cyan-400/40 bg-[#010612] overflow-hidden shadow-[inset_0_0_70px_rgba(0,195,255,0.2),0_0_24px_rgba(0,195,255,0.12)]" title="Toque no humanoide para falar com o Jarvis">
+        <video id="cam-video" class="hidden" autoplay muted playsinline></video>
+        <div class="holo-beam absolute inset-x-0 top-0 h-16"></div>
+
+        <!-- Miras Táticas nos 4 Cantos -->
+        <div class="chamber-bracket top-2 left-2 border-t-2 border-l-2 rounded-tl-md"></div>
+        <div class="chamber-bracket top-2 right-2 border-t-2 border-r-2 rounded-tr-md"></div>
+        <div class="chamber-bracket bottom-2 left-2 border-b-2 border-l-2 rounded-bl-md"></div>
+        <div class="chamber-bracket bottom-2 right-2 border-b-2 border-r-2 rounded-br-md"></div>
+
+        <canvas id="reactor-canvas" class="w-full h-full"></canvas>
+
+        <!-- Relógio Holográfico -->
+        <div class="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 flex flex-col items-center z-[4]">
+          <div class="px-4 py-1 rounded-full bg-black/70 border border-cyan-400/60 shadow-[0_0_24px_rgba(34,211,238,0.55)] backdrop-blur-md flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse"></span>
+            <span id="chamber-clock" class="font-orbitron font-bold text-xs sm:text-sm tracking-[0.26em] text-cyan-100 drop-shadow-[0_0_10px_#22d3ee]">--:--:--</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse"></span>
+          </div>
+        </div>
+
+        <!-- Telemetria lateral esquerda (real) -->
+        <div class="pointer-events-none hidden sm:flex flex-col gap-1 absolute left-3 top-3 font-mono-tech text-[9px] text-cyan-200/85 z-[4]">
+          <span class="px-2 py-0.5 rounded bg-black/70 border border-cyan-400/35">ENTRADA: <strong id="tel-az" class="hud-glow-text">0%</strong></span>
+          <span class="px-2 py-0.5 rounded bg-black/70 border border-cyan-400/35">SAÍDA: <strong id="tel-el" class="hud-glow-text">0%</strong></span>
+          <span class="px-2 py-0.5 rounded bg-black/70 border border-cyan-400/35">MICROFONE: <strong id="tel-active-node" class="hud-glow-text">INATIVO</strong></span>
+        </div>
+
+        <!-- Telemetria lateral direita (real) -->
+        <div class="pointer-events-none hidden sm:flex flex-col items-end gap-1 absolute right-3 top-3 font-mono-tech text-[9px] text-cyan-200/85 z-[4]">
+          <span class="px-2 py-0.5 rounded bg-black/70 border border-cyan-400/35">SESSÃO: <strong id="tel-sync" class="text-emerald-300">00:00</strong></span>
+          <span class="px-2 py-0.5 rounded bg-black/70 border border-cyan-400/35">CÂMERA: <strong id="tel-flux" class="text-amber-300">DESLIGADA</strong></span>
+        </div>
+
+        <!-- Indicador de estado -->
+        <div class="pointer-events-none absolute bottom-2 inset-x-0 flex flex-col items-center justify-center z-[4]">
+          <div class="px-4 py-1 rounded-full bg-black/80 border border-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.38)] backdrop-blur-md flex items-center gap-2">
+            <span id="core-label" class="font-orbitron font-bold text-[10px] tracking-[0.22em] uppercase hud-glow-text">EM ESPERA</span>
+            <span class="text-cyan-400/60">◈</span>
+            <span id="core-sub-label" class="font-mono-tech text-[9px] text-cyan-100/95">TOQUE NO HUMANOIDE PARA FALAR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analisador de Espectro (áudio real) -->
+      <div class="h-11 w-full rounded-xl bg-black/55 border border-cyan-400/30 shadow-[inset_0_0_18px_rgba(34,211,238,0.12)] overflow-hidden shrink-0">
+        <canvas id="wave-canvas" class="w-full h-full"></canvas>
+      </div>
+
+      <!-- Caixa de Transmissão Ativa -->
+      <div class="rounded-xl bg-black/50 border border-cyan-500/25 p-2.5 shrink-0 max-h-28 overflow-y-auto hud-scroll">
+        <div class="flex items-center justify-between mb-1 font-mono-tech text-[9px] text-cyan-300/75">
+          <span id="tx-badge">TRANSMISSÃO · JARVIS</span>
+          <button id="btn-replay-voice" class="hover:text-white underline cursor-pointer" title="Pede ao Jarvis para repetir a última resposta">🔁 REPETIR</button>
+        </div>
+        <div id="tx-text" class="text-xs sm:text-sm text-cyan-50 leading-relaxed whitespace-pre-wrap">Jarvis desconectado. Toque em 🎙️ ou no humanoide para iniciar a conversa.</div>
+      </div>
+
+      <!-- Atalhos de Comando Rápido (preenchem a caixa de comando) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto hud-scroll pb-0.5 shrink-0 font-mono-tech text-[10px]">
+        <button data-action="music" class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">📺 YouTube Play</button>
+        <button data-quick="Recomenda-me uma música para " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🎵 Sugerir Música</button>
+        <button data-quick="/hugginggpt Planeia e executa " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🤗 /hugginggpt</button>
+        <button data-quick="Escreve um roteiro de vídeo viral para CapCut sobre " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">✂️ /capcut</button>
+        <button data-quick="Cria um roteiro de vídeo realista, cena a cena, sobre " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🎥 Vídeo Realista</button>
+        <button data-action="image" class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🎨 Gerar imagem</button>
+        <button data-quick="Explica-me passo a passo como criar um jogo simples em HTML de " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">💻 Criar Jogo</button>
+      </div>
+
+      <!-- Barra de Comando + Microfone Duplo -->
+      <form id="cmd-form" class="flex items-center gap-1.5 shrink-0">
+        <button type="button" id="btn-mic" class="cyber-btn p-2.5 rounded-xl text-sm shrink-0" title="Ativar / Encerrar conversa por voz com o Jarvis">🎙️</button>
+        <button type="button" id="btn-handsfree" class="cyber-btn p-2.5 rounded-xl text-sm shrink-0" title="Silenciar / reativar o seu microfone na sessão" disabled>👂</button>
+        <input id="cmd-input" type="text" autocomplete="off" placeholder="Escreva uma ordem para o Jarvis (sessão ativa)..." class="flex-1 min-w-0 bg-black/60 border border-cyan-500/35 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" />
+        <button type="submit" class="cyber-btn px-4 py-2.5 rounded-xl font-orbitron font-bold text-xs shrink-0">ENVIAR</button>
+      </form>
+    </section>
+
+    <!-- COLUNA DIREITA: Comunicações -->
+    <section id="pane-chat" class="hud-pane hud-panel rounded-2xl p-3 lg:col-span-3 flex flex-col gap-2 min-h-0 overflow-hidden">
+      <div class="flex items-center justify-between shrink-0">
+        <h2 class="font-orbitron font-bold text-xs tracking-wider hud-glow-text">📡 COMUNICAÇÕES</h2>
+        <button id="btn-clear-chat" class="font-mono-tech text-[9px] text-cyan-300/70 hover:text-white cursor-pointer">LIMPAR</button>
+      </div>
+      <div id="chat-log" class="hud-scroll flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 text-xs">
+        <div id="chat-empty" class="text-center text-cyan-300/50 font-mono-tech text-[10px] mt-6 leading-relaxed">A transcrição da conversa com o Jarvis aparece aqui em tempo real.</div>
+      </div>
+
+      <!-- Mini-Resumo de Sistemas (Desktop) -->
+      <div class="hidden lg:flex flex-col gap-1.5 pt-2 border-t border-cyan-500/20 shrink-0">
+        <div class="flex items-center justify-between font-mono-tech text-[10px]">
+          <span class="text-cyan-300 font-bold">🧠 MEMÓRIA &amp; DIRETIVAS</span>
+          <span id="sys-summary-badge" class="text-cyan-200/70">0 tarefas</span>
+        </div>
+        <div class="flex gap-1.5">
+          <input id="task-input-d" type="text" placeholder="Nova diretiva..." class="flex-1 min-w-0 bg-black/50 border border-cyan-500/30 rounded-lg px-2.5 py-1 text-[11px] text-white" />
+          <button id="btn-add-task-d" class="cyber-btn px-2.5 py-1 rounded-lg text-xs font-bold">+</button>
+        </div>
+        <div id="desktop-tasks-preview" class="hud-scroll max-h-24 overflow-y-auto space-y-1 font-mono-tech text-[10px]"></div>
+      </div>
+    </section>
+
+    <!-- ABA SISTEMAS (Mobile) -->
+    <section id="pane-sys" class="hud-pane lg:!hidden hud-panel rounded-2xl p-3 flex flex-col gap-3 min-h-0 overflow-y-auto hud-scroll">
+      <h2 class="font-orbitron font-bold text-xs tracking-wider hud-glow-text">⚙️ SISTEMAS · MEMÓRIA &amp; TAREFAS</h2>
+
+      <div class="rounded-xl bg-black/40 border border-cyan-500/20 p-2.5 space-y-2">
+        <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">📋 DIRETIVAS ATIVAS</div>
+        <div class="flex gap-1.5">
+          <input id="task-input" type="text" placeholder="Nova..." class="flex-1 bg-black/50 border border-cyan-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+          <button id="btn-add-task" class="cyber-btn px-3 py-1.5 rounded-lg text-xs font-bold">+</button>
+        </div>
+        <div id="task-list" class="space-y-1 font-mono-tech text-[11px]"></div>
+      </div>
+
+      <div class="rounded-xl bg-black/40 border border-cyan-500/20 p-2.5 space-y-2">
+        <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">🧬 MATRIZ DE MEMÓRIA (NESTE NAVEGADOR)</div>
+        <div class="flex gap-1.5">
+          <input id="memory-input" type="text" placeholder="Algo que o Jarvis deve saber..." class="flex-1 bg-black/50 border border-cyan-500/30 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+          <button id="btn-add-memory" class="cyber-btn px-3 py-1.5 rounded-lg text-xs font-bold">+</button>
+        </div>
+        <div id="memory-list" class="space-y-1 font-mono-tech text-[10px] text-cyan-100/80"></div>
+        <div class="font-mono-tech text-[9px] text-cyan-300/60">Enviada ao Jarvis como contexto no início de cada sessão.</div>
+      </div>
+
+      <div class="rounded-xl bg-black/40 border border-cyan-500/20 p-2.5 flex items-center justify-between">
+        <span class="font-mono-tech text-[10px] text-cyan-300 font-bold">⏱️ TEMPO DE SESSÃO</span>
+        <span id="timer-display" class="font-orbitron font-bold text-sm hud-glow-text">00:00</span>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== MINI-LEITOR FLUTUANTE DE MÚSICA ==================== -->
+<div id="mini-music-bar" class="hidden fixed bottom-3 right-3 z-40 hud-panel rounded-2xl px-3 py-2 flex items-center gap-2 max-w-sm shadow-2xl">
+  <span id="mini-music-icon" class="text-lg animate-pulse shrink-0">🎵</span>
+  <div class="min-w-0 flex-1">
+    <div id="mini-music-title" class="font-mono-tech text-[10px] font-bold text-white truncate">Sem faixa</div>
+    <div id="mini-music-status" class="font-mono-tech text-[9px] text-cyan-300/80 truncate">Parado</div>
+  </div>
+  <button id="btn-mini-playpause" class="cyber-btn px-2 py-1 rounded-lg text-[10px]" title="Pausar / Retomar">⏯</button>
+  <button id="btn-mini-next" class="cyber-btn px-2 py-1 rounded-lg text-[10px]" title="Próxima faixa">⏭</button>
+  <button id="btn-mini-open" class="cyber-btn px-2 py-1 rounded-lg text-[10px]">ABRIR</button>
+  <button id="btn-mini-stop" class="cyber-btn px-2 py-1 rounded-lg text-[10px]">⏹</button>
+</div>
+
+<!-- ==================== MODAL 1: ARSENAL DE HABILIDADES ==================== -->
+<div id="modal-skills" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3">
+  <div class="hud-panel rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div class="p-3.5 border-b border-cyan-500/25 flex items-center justify-between">
+      <div>
+        <h3 class="font-orbitron font-bold text-sm hud-glow-text">🧩 ARSENAL DE HABILIDADES DO AGENTE</h3>
+        <p class="font-mono-tech text-[10px] text-cyan-200/70">Cada habilidade envia um comando de texto ao Jarvis (sessão ativa). Ele responde por voz e na transcrição.</p>
+      </div>
+      <button data-close="modal-skills" class="cyber-btn px-3 py-1.5 rounded-xl text-xs">✕</button>
+    </div>
+    <div class="px-3.5 pt-3 flex gap-2">
+      <input id="skill-arg" type="text" placeholder="Complemento do comando (ex.: um vídeo sobre IA em 2026)" class="flex-1 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+    </div>
+    <div id="skills-grid" class="hud-scroll p-3.5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL 2: CRIADOR MULTIPLATAFORMA & CAPCUT ==================== -->
+<div id="modal-creator" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+  <div class="hud-panel rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between gap-2">
+      <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">🎬 CENTRAL DE CRIAÇÃO · VÍDEO &amp; CAPCUT</h3>
+      <button data-close="modal-creator" class="cyber-btn px-3 py-1 rounded-xl text-xs">✕</button>
+    </div>
+
+    <div class="p-3 border-b border-cyan-500/15 flex flex-col sm:flex-row gap-2">
+      <input id="creator-topic" type="text" placeholder="Tema do vídeo / campanha (ex.: IA que muda o mundo em 2026)..." class="flex-1 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-400" />
+      <button id="btn-creator-gen-all" class="cyber-btn px-4 py-2 rounded-xl font-orbitron font-bold text-xs shrink-0" title="Pede ao Jarvis os 3 textos, um de cada vez">🚀 PEDIR TUDO AO JARVIS</button>
+    </div>
+
+    <div class="px-3 pt-2 flex gap-1.5 overflow-x-auto hud-scroll shrink-0">
+      <button data-ctab="ctab-campaign" class="ctab-btn cyber-btn active px-3 py-1.5 rounded-xl font-mono-tech text-[10px] shrink-0">📢 POSTAGENS YT/TT/FB</button>
+      <button data-ctab="ctab-video" class="ctab-btn cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] shrink-0">🎥 VÍDEO DE CENAS</button>
+      <button data-ctab="ctab-capcut" class="ctab-btn cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] shrink-0">✂️ CAPCUT STUDIO</button>
+      <button data-ctab="ctab-channels" class="ctab-btn cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] shrink-0">📅 CANAIS &amp; AGENDA</button>
+    </div>
+
+    <div class="hud-scroll flex-1 overflow-y-auto p-3 space-y-3">
+      <!-- ABA 1: CAMPANHA -->
+      <div id="ctab-campaign" class="ctab-panel space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div class="rounded-xl bg-black/45 border border-red-500/30 p-2.5 space-y-1.5">
+            <div class="flex justify-between items-center font-mono-tech text-[10px] text-red-300 font-bold">
+              <span>▶ SEO PARA YOUTUBE</span>
+              <div class="flex gap-1">
+                <button data-ask="yt" class="ask-field cyber-btn px-2 py-0.5 rounded text-[9px]" title="Pedir ao Jarvis">🧠</button>
+                <button data-copy="out-yt" class="copy-field cyber-btn px-2 py-0.5 rounded text-[9px]">📋</button>
+                <a href="https://studio.youtube.com" target="_blank" rel="noopener" class="cyber-btn px-2 py-0.5 rounded text-[9px]">STUDIO ↗</a>
+              </div>
+            </div>
+            <textarea id="out-yt" rows="6" placeholder="Título, descrição e tags..." class="w-full bg-black/50 border border-cyan-500/20 rounded-lg p-2 text-[11px] text-cyan-50 font-mono-tech"></textarea>
+          </div>
+          <div class="rounded-xl bg-black/45 border border-pink-500/30 p-2.5 space-y-1.5">
+            <div class="flex justify-between items-center font-mono-tech text-[10px] text-pink-300 font-bold">
+              <span>🎵 TIKTOK VIRAL</span>
+              <div class="flex gap-1">
+                <button data-ask="tt" class="ask-field cyber-btn px-2 py-0.5 rounded text-[9px]" title="Pedir ao Jarvis">🧠</button>
+                <button data-copy="out-tt" class="copy-field cyber-btn px-2 py-0.5 rounded text-[9px]">📋</button>
+                <a href="https://www.tiktok.com/upload" target="_blank" rel="noopener" class="cyber-btn px-2 py-0.5 rounded text-[9px]">UPLOAD ↗</a>
+              </div>
+            </div>
+            <textarea id="out-tt" rows="6" placeholder="Legenda e hashtags..." class="w-full bg-black/50 border border-cyan-500/20 rounded-lg p-2 text-[11px] text-cyan-50 font-mono-tech"></textarea>
+          </div>
+          <div class="rounded-xl bg-black/45 border border-blue-500/30 p-2.5 space-y-1.5">
+            <div class="flex justify-between items-center font-mono-tech text-[10px] text-blue-300 font-bold">
+              <span>📘 POSTAGEM NO FACEBOOK</span>
+              <div class="flex gap-1">
+                <button data-ask="fb" class="ask-field cyber-btn px-2 py-0.5 rounded text-[9px]" title="Pedir ao Jarvis">🧠</button>
+                <button data-copy="out-fb" class="copy-field cyber-btn px-2 py-0.5 rounded text-[9px]">📋</button>
+                <a href="https://business.facebook.com" target="_blank" rel="noopener" class="cyber-btn px-2 py-0.5 rounded text-[9px]">META ↗</a>
+              </div>
+            </div>
+            <textarea id="out-fb" rows="6" placeholder="Texto da publicação..." class="w-full bg-black/50 border border-cyan-500/20 rounded-lg p-2 text-[11px] text-cyan-50 font-mono-tech"></textarea>
+          </div>
+        </div>
+        <div class="font-mono-tech text-[9px] text-cyan-300/60">🧠 envia o pedido ao Jarvis (sessão ativa) e a próxima resposta dele é colocada no campo.</div>
+
+        <!-- Miniatura -->
+        <div class="rounded-xl bg-black/45 border border-cyan-500/25 p-3 flex flex-col sm:flex-row items-center gap-3">
+          <div class="flex-1 space-y-1.5">
+            <div class="font-orbitron text-xs font-bold hud-glow-text">🖼️ MINIATURA 16:9</div>
+            <p class="text-[11px] text-cyan-100/75">Gera uma imagem de capa a partir do tema com o Pollinations.ai (gratuito, sem chave). A imagem não leva texto.</p>
+            <div class="flex gap-2">
+              <button id="btn-creator-thumb" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✨ GERAR MINIATURA</button>
+              <a id="btn-download-thumb" class="hidden cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold" target="_blank" rel="noopener">⬇ ABRIR / BAIXAR</a>
+            </div>
+          </div>
+          <div id="thumb-preview-wrap" class="w-full sm:w-56 aspect-video rounded-xl bg-black/70 border border-cyan-500/25 flex items-center justify-center overflow-hidden text-[10px] font-mono-tech text-cyan-300/60">Pré-visualização 16:9</div>
+        </div>
+      </div>
+
+      <!-- ABA 2: VÍDEO DE CENAS (.WEBM) -->
+      <div id="ctab-video" class="ctab-panel hidden space-y-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="video-aspect" class="bg-black/60 border border-cyan-500/35 rounded-xl px-3 py-1.5 text-xs text-white font-mono-tech">
+            <option value="9:16">9:16 (TikTok / Shorts / Reels)</option>
+            <option value="16:9">16:9 (YouTube / Facebook)</option>
+          </select>
+          <button id="btn-gen-scenes" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✨ GERAR IMAGENS DAS CENAS</button>
+          <button id="btn-preview-video" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">▶ PRÉ-VISUALIZAR</button>
+          <button id="btn-record-video" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">⏺ GRAVAR &amp; BAIXAR (.WEBM)</button>
+        </div>
+        <div id="video-status" class="font-mono-tech text-[10px] text-cyan-300">Escreva 1 cena por linha. As imagens vêm do Pollinations.ai; sem imagens, o vídeo usa fundos animados.</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <div class="font-mono-tech text-[10px] text-cyan-300/80">ROTEIRO DE CENAS (1 cena por linha)</div>
+            <textarea id="video-scenes-input" rows="7" class="w-full bg-black/55 border border-cyan-500/25 rounded-xl p-2.5 text-xs text-white font-mono-tech">Uma cidade futurista iluminada por neon ao pôr do sol
+Um engenheiro holográfico projetando naves espaciais
+Explosão de luz quântica sobre o oceano cristalino
+O futuro começa agora — inscreva-se no canal</textarea>
+            <div id="recorded-video-wrap" class="hidden space-y-1.5 pt-2">
+              <div class="font-mono-tech text-[10px] text-emerald-300 font-bold">✅ VÍDEO RENDERIZADO:</div>
+              <video id="recorded-video-el" controls class="w-full max-h-56 rounded-xl border border-emerald-400/40 bg-black"></video>
+              <a id="recorded-video-dl" download="arquiteto-video.webm" class="cyber-btn inline-block px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">⬇ BAIXAR VÍDEO FINAL</a>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-center rounded-xl bg-black/60 border border-cyan-500/25 p-2">
+            <canvas id="creator-video-canvas" width="360" height="640" class="max-h-[340px] w-auto rounded-xl border border-cyan-400/30 bg-black"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 3: CAPCUT STUDIO -->
+      <div id="ctab-capcut" class="ctab-panel hidden space-y-3">
+        <div class="flex flex-wrap gap-2">
+          <button id="btn-capcut-build" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✂️ GERAR TIMELINE</button>
+          <button id="btn-capcut-ask" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">🧠 PEDIR ROTEIRO AO JARVIS</button>
+          <button id="btn-capcut-srt" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">⬇ LEGENDAS .SRT</button>
+          <button id="btn-capcut-json" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">⬇ PROJETO .JSON</button>
+          <button id="btn-capcut-open" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✂️ COPIAR &amp; ABRIR CAPCUT WEB ↗</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">ROTEIRO (1 fala por linha)</div>
+            <textarea id="capcut-script" rows="8" class="w-full bg-black/55 border border-cyan-500/25 rounded-xl p-2.5 text-xs text-cyan-50 font-mono-tech" placeholder="Escreva ou peça o roteiro ao Jarvis..."></textarea>
+          </div>
+          <div class="space-y-1">
+            <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">TIMELINE DE CORTES, TRANSIÇÕES &amp; EFEITOS</div>
+            <div id="capcut-timeline" class="hud-scroll h-48 overflow-y-auto rounded-xl bg-black/55 border border-cyan-500/25 p-2.5 font-mono-tech text-[10px] space-y-2">
+              <div class="text-cyan-200/60">Clique em "GERAR TIMELINE" para calcular os tempos a partir do roteiro.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 4: CANAIS & AGENDA -->
+      <div id="ctab-channels" class="ctab-panel hidden space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input id="ch-yt" type="text" placeholder="@SeuCanalYouTube" class="bg-black/55 border border-cyan-500/30 rounded-xl px-3 py-2 text-xs text-white" />
+          <input id="ch-tt" type="text" placeholder="@SeuTikTok" class="bg-black/55 border border-cyan-500/30 rounded-xl px-3 py-2 text-xs text-white" />
+          <input id="ch-fb" type="text" placeholder="Página do Facebook" class="bg-black/55 border border-cyan-500/30 rounded-xl px-3 py-2 text-xs text-white" />
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <button id="btn-save-channels" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">💾 GUARDAR CANAIS</button>
+          <input id="schedule-at" type="datetime-local" class="bg-black/55 border border-cyan-500/30 rounded-xl px-3 py-1.5 text-xs text-white" />
+          <button id="btn-schedule-campaign" class="cyber-btn px-3 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">📅 ANOTAR NA AGENDA</button>
+        </div>
+        <div class="font-mono-tech text-[9px] text-cyan-300/60">A agenda é só um lembrete guardado neste navegador. Nada é publicado automaticamente.</div>
+        <div id="schedule-list" class="space-y-1.5 font-mono-tech text-[10px]"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL 3: YOUTUBE & MÚSICA ==================== -->
+<div id="modal-music" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+  <div class="hud-panel rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between">
+      <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">📺 YOUTUBE · VÍDEOS E MÚSICAS</h3>
+      <button data-close="modal-music" class="cyber-btn px-3 py-1 rounded-xl text-xs">✕</button>
+    </div>
+    <div class="hud-scroll p-3 overflow-y-auto space-y-3">
+      <div class="flex gap-2">
+        <input id="music-query-input" type="text" placeholder="Pesquisa (ex.: Linkin Park) ou cole um link do YouTube..." class="flex-1 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs sm:text-sm text-white" />
+        <button id="btn-music-search" class="cyber-btn px-4 py-2 rounded-xl font-orbitron font-bold text-xs shrink-0">▶ REPRODUZIR</button>
+      </div>
+      <div class="font-mono-tech text-[9px] text-cyan-300/60">Link do YouTube → toca aqui dentro. Texto de pesquisa → abre a pesquisa no YouTube numa nova aba (pesquisar dentro da página exigiria chave de API).</div>
+
+      <div class="flex flex-wrap items-center justify-between gap-1.5">
+        <div class="flex flex-wrap gap-1.5">
+          <label class="cyber-btn px-2.5 py-1 rounded-lg font-mono-tech text-[10px] cursor-pointer">
+            📂 MP3 LOCAL
+            <input id="music-local-file" type="file" accept="audio/*" multiple class="hidden" />
+          </label>
+        </div>
+        <a href="https://www.youtube.com" target="_blank" rel="noopener" class="cyber-btn px-2.5 py-1 rounded-lg font-mono-tech text-[10px]">▶ ABRIR O YOUTUBE ↗</a>
+      </div>
+
+      <div id="music-now-card" class="rounded-xl bg-black/55 border border-cyan-500/25 p-3 flex items-center gap-3">
+        <div class="w-14 h-14 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-2xl shrink-0">📺</div>
+        <div class="min-w-0 flex-1">
+          <div id="music-track-title" class="font-orbitron font-bold text-xs sm:text-sm text-white truncate">Nada a tocar</div>
+          <div id="music-track-artist" class="font-mono-tech text-[10px] text-cyan-300/80 truncate">Cole um link do YouTube ou escolha arquivos de áudio</div>
+          <div id="music-status" class="font-mono-tech text-[10px] text-emerald-300 mt-0.5 truncate">Aguardando...</div>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="btn-music-prev" class="cyber-btn px-2 py-1.5 rounded-lg text-xs" title="Anterior">⏮</button>
+          <button id="btn-music-playpause" class="cyber-btn px-2.5 py-1.5 rounded-lg text-xs font-bold" title="Reproduzir / Pausar">⏯</button>
+          <button id="btn-music-next" class="cyber-btn px-2 py-1.5 rounded-lg text-xs" title="Próxima">⏭</button>
+        </div>
+      </div>
+
+      <div id="yt-player-wrap" class="aspect-video w-full rounded-xl overflow-hidden bg-black border border-cyan-500/30 flex items-center justify-center text-xs text-cyan-300/60 font-mono-tech text-center p-3">
+        Cole um link do YouTube para tocar aqui
+      </div>
+
+      <audio id="direct-audio-player" controls playsinline class="hidden w-full rounded-xl"></audio>
+
+      <div class="space-y-1">
+        <div class="font-mono-tech text-[10px] text-cyan-300/80">FILA LOCAL (TOQUE PARA DAR PLAY):</div>
+        <div id="music-results-list" class="space-y-1 max-h-40 overflow-y-auto hud-scroll"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL 4: PROJETOR DE IMAGENS ==================== -->
+<div id="modal-image" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+  <div class="hud-panel rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between">
+      <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">🎨 PROJETOR HOLOGRÁFICO DE IMAGENS</h3>
+      <button data-close="modal-image" class="cyber-btn px-3 py-1 rounded-xl text-xs">✕</button>
+    </div>
+    <div class="p-3 space-y-3 overflow-y-auto hud-scroll">
+      <div class="flex gap-2">
+        <input id="image-prompt-input" type="text" placeholder="Descreva a imagem (inglês dá melhores resultados)..." class="flex-1 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs sm:text-sm text-white" />
+        <button id="btn-gen-image" class="cyber-btn px-4 py-2 rounded-xl font-orbitron font-bold text-xs">✨ GERAR</button>
+      </div>
+      <div class="font-mono-tech text-[9px] text-cyan-300/60">Gerado pelo Pollinations.ai (serviço gratuito, sem chave). O texto do pedido é enviado para esse serviço.</div>
+      <div id="image-stage" class="min-h-[260px] rounded-xl bg-black/60 border border-cyan-500/25 flex items-center justify-center overflow-hidden p-2 text-xs font-mono-tech text-cyan-300/60">Aguardando prompt visual...</div>
+      <div class="flex justify-end">
+        <a id="btn-download-image" class="hidden cyber-btn px-4 py-2 rounded-xl font-mono-tech text-xs font-bold" target="_blank" rel="noopener">⬇ ABRIR / BAIXAR IMAGEM</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL 5: ESTÚDIO AO VIVO ==================== -->
+<div id="modal-studio" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+  <div class="hud-panel rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between gap-2">
+      <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">💻 ESTÚDIO AO VIVO (HTML / JS)</h3>
+      <div class="flex gap-1.5">
+        <button id="btn-studio-run" class="cyber-btn px-3 py-1 rounded-xl font-mono-tech text-[10px] font-bold">▶ EXECUTAR</button>
+        <button id="btn-studio-copy" class="cyber-btn px-3 py-1 rounded-xl font-mono-tech text-[10px] font-bold">📋 COPIAR</button>
+        <button data-close="modal-studio" class="cyber-btn px-3 py-1 rounded-xl text-xs">✕</button>
+      </div>
+    </div>
+    <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-2 p-2.5">
+      <textarea id="studio-code" spellcheck="false" class="w-full h-full bg-black/70 border border-cyan-500/25 rounded-xl p-2.5 font-mono-tech text-[11px] text-cyan-100 resize-none focus:outline-none"></textarea>
+      <iframe id="studio-preview" sandbox="allow-scripts allow-modals" title="Pré-visualização" class="w-full h-full rounded-xl bg-white border border-cyan-500/30"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICAÇÃO (toast) -->
+<div id="hud-toast" class="hidden pointer-events-none fixed top-4 left-1/2 -translate-x-1/2 z-[60] hud-panel rounded-full px-4 py-2 font-mono-tech text-xs text-white shadow-2xl"></div>
+
+<!-- Fallback se o SDK falhar -->
+<div id="fallback" class="hidden fixed bottom-4 left-4 z-[55] hud-panel rounded-2xl p-3 max-w-sm space-y-2">
+  <div class="font-orbitron text-xs font-bold text-rose-300">MODO ALTERNATIVO</div>
+  <p id="fb-msg" class="text-xs text-cyan-100/85">Não consegui iniciar a conexão direta.</p>
+  <div class="flex flex-wrap gap-1.5 font-mono-tech text-[10px]">
+    <a class="cyber-btn px-3 py-1.5 rounded-lg" href="https://elevenlabs.io/app/talk-to?agent_id=agent_2601m81gpwvge0689sd4jkyjv8fn" target="_blank" rel="noopener">ABRIR NO ELEVENLABS ↗</a>
+    <button id="btn-widget" class="cyber-btn px-3 py-1.5 rounded-lg">USAR WIDGET</button>
+    <button id="btn-close-fb" class="cyber-btn px-3 py-1.5 rounded-lg">FECHAR</button>
+  </div>
+</div>
+
+<!-- ==================== MOTOR PRINCIPAL DO ARQUITETO ==================== -->
+<script type="module">
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+/* ==================== CONFIGURAÇÃO & ESTADO GLOBAL ==================== */
+const AGENT_ID = "agent_2601m81gpwvge0689sd4jkyjv8fn";          // agente público do Jarvis (sem chave)
+const TALK_TO_URL = "https://elevenlabs.io/app/talk-to?agent_id=" + AGENT_ID;
+const SDK_URL = "https://esm.sh/@elevenlabs/client@1.37.1";
+const TZ = "Europe/Lisbon";
+
+const PROTOCOLOS = [
+  { nome: "CIANO STARK",      rgb: { r: 34,  g: 211, b: 238 } },
+  { nome: "MATRIX VERDE",     rgb: { r: 16,  g: 185, b: 129 } },
+  { nome: "OURO MARK",        rgb: { r: 245, g: 158, b: 11  } },
+  { nome: "RUBI PLASMA",      rgb: { r: 244, g: 63,  b: 94  } },
+  { nome: "VIOLETA QUÂNTICO", rgb: { r: 168, g: 85,  b: 247 } },
+  { nome: "PLASMA SOLAR",     rgb: { r: 56,  g: 189, b: 248 } }
+];
+
+/* Cada habilidade = um comando de texto enviado ao Jarvis. Nada é executado localmente. */
+const CATALOGO_DE_HABILIDADES = [
+  { id: "hugginggpt", nome: "HuggingGPT / JARVIS", cat: "Orquestração", desc: "Fluxo de 4 etapas (arXiv:2303.17580): Planejamento → Seleção de Modelo → Execução → Síntese.", cmd: "/hugginggpt Planeia e executa " },
+  { id: "planner", nome: "Planejador de Tarefas", cat: "Orquestração", desc: "Divide um objetivo em passos concretos com prioridades.", cmd: "Divide este objetivo em passos concretos, com prioridades: " },
+  { id: "capcut", nome: "Roteiro CapCut", cat: "Vídeo", desc: "Roteiro curto com cortes, transições e legendas para o CapCut.", cmd: "Escreve um roteiro para CapCut, com cortes, transições e legendas, sobre " },
+  { id: "realvideo", nome: "Vídeo Realista (cenas)", cat: "Vídeo", desc: "Descreve cena a cena um vídeo realista, pronto para gerar imagens.", cmd: "Descreve, cena a cena, um vídeo realista de 30 segundos sobre " },
+  { id: "hooks", nome: "Ganchos Virais", cat: "Vídeo", desc: "Cinco ganchos para os primeiros 3 segundos de um Short ou TikTok.", cmd: "Dá-me cinco ganchos fortes para os primeiros 3 segundos de um vídeo sobre " },
+  { id: "ytseo", nome: "SEO YouTube", cat: "Redes Sociais", desc: "Título, descrição e tags otimizados para o YouTube.", cmd: "Cria título, descrição e tags de YouTube para um vídeo sobre " },
+  { id: "tiktok", nome: "Legenda TikTok", cat: "Redes Sociais", desc: "Legenda curta com hashtags para o TikTok.", cmd: "Escreve uma legenda curta de TikTok com hashtags para um vídeo sobre " },
+  { id: "facebook", nome: "Post Facebook", cat: "Redes Sociais", desc: "Texto de publicação para a página do Facebook.", cmd: "Escreve uma publicação de Facebook sobre " },
+  { id: "calendar", nome: "Calendário de Conteúdo", cat: "Redes Sociais", desc: "Plano de publicações para a semana.", cmd: "Faz um calendário de publicações para esta semana sobre " },
+  { id: "thumb", nome: "Ideia de Miniatura", cat: "Imagem", desc: "Descreve uma miniatura chamativa (para gerar no projetor de imagens).", cmd: "Descreve uma miniatura chamativa de YouTube, em inglês, para um vídeo sobre " },
+  { id: "music", nome: "Curador Musical", cat: "Áudio", desc: "Sugestões de músicas para um momento ou vídeo.", cmd: "Sugere-me cinco músicas para " },
+  { id: "voiceover", nome: "Texto de Narração", cat: "Áudio", desc: "Texto de locução com ritmo para ler em voz alta.", cmd: "Escreve um texto de narração de 30 segundos sobre " },
+  { id: "code", nome: "Programador", cat: "Código", desc: "Explica ou escreve código passo a passo (cole no Estúdio).", cmd: "Explica-me passo a passo como programar " },
+  { id: "game", nome: "Criador de Jogos", cat: "Código", desc: "Ideia e lógica de um mini-jogo em HTML.", cmd: "Dá-me a ideia e a lógica de um mini-jogo simples em HTML sobre " },
+  { id: "translate", nome: "Tradutor", cat: "Linguagem", desc: "Traduz qualquer texto.", cmd: "Traduz para inglês: " },
+  { id: "summary", nome: "Resumo", cat: "Linguagem", desc: "Resume um texto ou ideia em pontos.", cmd: "Resume em tópicos: " },
+  { id: "study", nome: "Professor", cat: "Aprendizagem", desc: "Explica um tema de forma simples, com exemplos.", cmd: "Explica de forma simples, com exemplos: " },
+  { id: "memory", nome: "Matriz de Memória", cat: "Memória", desc: "Pede ao Jarvis para considerar as suas notas guardadas neste painel.", cmd: "Tem em conta as minhas notas e diz-me o que sugeres: " },
+  { id: "brainstorm", nome: "Tempestade de Ideias", cat: "Criatividade", desc: "Dez ideias rápidas sobre qualquer tema.", cmd: "Dá-me dez ideias rápidas sobre " }
+];
+
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("arq_" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("arq_" + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+const S = {
+  status: "disconnected", mode: "idle", conv: null, start: 0,
+  inV: 0, outV: 0, micMuted: false, voiceMuted: false,
+  auto: true, prisma: false, protoIdx: 0,
+  missions: [], pending: [], lastAgent: "", camStream: null
+};
+
+/* ==================== UTILIDADES ==================== */
+let toastTimer = null;
+function toast(msg, ms = 2600) {
+  const t = $("hud-toast"); t.textContent = msg; t.classList.remove("hidden");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add("hidden"), ms);
+}
+const fTime = new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+function hhmm() { return fTime.format(new Date()).slice(0, 5); }
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function dag(msg, cls = "text-cyan-200/80") {
+  const d = document.createElement("div"); d.className = cls;
+  d.textContent = "[" + fTime.format(new Date()) + "] " + msg;
+  $("hg-dag-log").append(d); $("hg-dag-log").scrollTop = $("hg-dag-log").scrollHeight;
+}
+function download(name, text, type = "text/plain") {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast("📋 Copiado"); }
+  catch (e) { toast("Não foi possível copiar"); }
+}
+
+/* ==================== PROTOCOLOS DE COR ==================== */
+function applyRGB(r, g, b) {
+  const st = document.documentElement.style;
+  st.setProperty("--hud-r", r); st.setProperty("--hud-g", g); st.setProperty("--hud-b", b);
+}
+function applyProtocol(i) {
+  S.protoIdx = (i + PROTOCOLOS.length) % PROTOCOLOS.length;
+  const p = PROTOCOLOS[S.protoIdx]; applyRGB(p.rgb.r, p.rgb.g, p.rgb.b);
+  $("tel-theme").textContent = p.nome; LS.set("proto", S.protoIdx);
+}
+$("btn-color-cycle").onclick = () => { S.prisma = false; $("btn-prisma-toggle").classList.remove("active"); applyProtocol(S.protoIdx + 1); toast("🎨 Protocolo " + PROTOCOLOS[S.protoIdx].nome); };
+$("btn-prisma-toggle").onclick = () => {
+  S.prisma = !S.prisma; $("btn-prisma-toggle").classList.toggle("active", S.prisma);
+  if (!S.prisma) applyProtocol(S.protoIdx); else $("tel-theme").textContent = "PRISMA";
+  toast(S.prisma ? "🌈 Modo Prisma ligado" : "🌈 Modo Prisma desligado");
+};
+function hsl2rgb(h, s, l) {
+  const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+applyProtocol(LS.get("proto", 0));
+
+/* ==================== ARRANQUE ==================== */
+$("boot-skill-count").textContent = CATALOGO_DE_HABILIDADES.length;
+$("skills-count-badge").textContent = CATALOGO_DE_HABILIDADES.length;
+$("btn-boot").onclick = () => {
+  $("boot-overlay").classList.add("hidden"); $("hud-root").classList.remove("opacity-0");
+  resizeAll(); dag("[BOOT] Câmara holográfica pronta. Toque em 🎙️ para ligar o Jarvis.", "text-cyan-300/80");
+};
+
+/* ==================== RELÓGIO ==================== */
+function tickClock() {
+  const t = fTime.format(new Date());
+  $("hud-clock").textContent = t; $("chamber-clock").textContent = t;
+  let tm = "00:00";
+  if (S.start) { const s = Math.floor((Date.now() - S.start) / 1000); tm = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  $("hdr-timer").textContent = tm; $("tel-sync").textContent = tm; $("timer-display").textContent = tm;
+}
+tickClock(); setInterval(tickClock, 1000);
+
+/* ==================== ESTADO VISUAL ==================== */
+const STATUS_PT = { disconnected: "DESCONECTADO", connecting: "CONECTANDO", connected: "CONECTADO", disconnecting: "DESCONECTANDO" };
+function setStep(n, txt, on) {
+  const el = $("hg-step-" + n); $("hg-step-" + n + "-txt").textContent = txt;
+  el.classList.toggle("border-cyan-300", !!on); el.classList.toggle("bg-cyan-500/15", !!on);
+}
+function render() {
+  const live = S.status === "connected";
+  const st = STATUS_PT[S.status] || S.status.toUpperCase();
+  $("hdr-status").textContent = st; $("tel-synapses").textContent = st;
+  $("hdr-dot").className = "relative w-2.5 h-2.5 rounded-full " + (live ? "bg-emerald-400 shadow-[0_0_12px_#34d399]" : S.status === "connecting" ? "bg-amber-400" : "bg-slate-400");
+  $("hdr-ping").className = "absolute inset-0 rounded-full " + (live ? "bg-emerald-400/40 animate-ping" : "bg-slate-400/30");
+  let mode = "EM ESPERA", core = "EM ESPERA", sub = "TOQUE NO HUMANOIDE PARA FALAR", badge = "EM ESPERA";
+  if (S.status === "connecting") { mode = "INICIANDO"; core = "SINCRONIZANDO"; sub = "A LIGAR AO JARVIS..."; badge = "CONECTANDO"; }
+  else if (live && S.mode === "speaking") { mode = "JARVIS FALANDO"; core = "FALANDO"; sub = "JARVIS RESPONDENDO"; badge = "EXECUTANDO"; }
+  else if (live) { mode = "OUVINDO"; core = "OUVINDO"; sub = S.micMuted ? "MICROFONE SILENCIADO" : "PODE FALAR"; badge = "ATIVO"; }
+  $("tel-route").textContent = mode; $("core-label").textContent = core; $("core-sub-label").textContent = sub; $("hg-status-badge").textContent = badge;
+  $("tel-active-node").textContent = live ? (S.micMuted ? "SILENCIADO" : "ATIVO") : "INATIVO";
+  $("btn-mic").classList.toggle("mic-live", live || S.status === "connecting");
+  $("btn-mic").textContent = live || S.status === "connecting" ? "⏹" : "🎙️";
+  $("btn-mic").title = live ? "Encerrar a conversa" : "Ativar o Jarvis por voz";
+  $("btn-handsfree").disabled = !live;
+  $("btn-handsfree").classList.toggle("active", live && S.micMuted);
+  setStep(3, live && S.mode === "speaking" ? "Jarvis a falar" : live ? "A ouvir" : "Pronto", live && S.mode === "speaking");
+}
+
+/* ==================== CHAT / TRANSCRIÇÃO ==================== */
+function addChat(role, text) {
+  const e = $("chat-empty"); if (e) e.remove();
+  const d = document.createElement("div");
+  const isUser = role === "user", isSys = role === "sys";
+  d.className = "rounded-xl px-2.5 py-1.5 border " + (isUser ? "bg-amber-500/10 border-amber-400/30 ml-4" : isSys ? "bg-black/30 border-cyan-500/15 text-cyan-200/70" : "bg-cyan-500/10 border-cyan-400/30 mr-4");
+  d.innerHTML = '<div class="font-mono-tech text-[9px] mb-0.5 ' + (isUser ? "text-amber-300" : "text-cyan-300") + '">' +
+    (isUser ? "VOCÊ" : isSys ? "SISTEMA" : "JARVIS") + " · " + hhmm() + '</div><div class="text-cyan-50 whitespace-pre-wrap leading-snug"></div>';
+  d.lastChild.textContent = text;
+  $("chat-log").append(d); $("chat-log").scrollTop = $("chat-log").scrollHeight;
+}
+$("btn-clear-chat").onclick = () => { $("chat-log").innerHTML = ""; toast("Transcrição limpa"); };
+
+/* ==================== SDK ELEVENLABS ==================== */
+let SDK = null;
+async function loadSDK() { if (!SDK) SDK = await import(SDK_URL); return SDK; }
+loadSDK().catch(() => {});
+
+function showFallback(msg) { $("fb-msg").textContent = msg; $("fallback").classList.remove("hidden"); }
+$("btn-close-fb").onclick = () => $("fallback").classList.add("hidden");
+$("btn-widget").onclick = () => {
+  if (!document.querySelector("elevenlabs-convai")) {
+    const w = document.createElement("elevenlabs-convai"); w.setAttribute("agent-id", AGENT_ID); document.body.append(w);
+    const s = document.createElement("script"); s.src = "https://unpkg.com/@elevenlabs/convai-widget-embed"; s.async = true; document.body.append(s);
+  }
+  $("fallback").classList.add("hidden"); toast("Widget do ElevenLabs carregado (canto inferior direito)");
+};
+
+function onAgentMessage(text) {
+  S.lastAgent = text;
+  $("tx-text").textContent = text;
+  setStep(4, "Resposta recebida", true); setTimeout(() => setStep(4, "Voz JARVIS", false), 2500);
+  if (S.pending.length) {
+    const target = S.pending.shift();
+    const el = $(target.field);
+    if (el) { el.value = text; toast("✅ Resposta colocada em " + target.label); }
+    if (target.next) setTimeout(target.next, 400);
+  }
+}
+
+async function startSession() {
+  if (!window.isSecureContext) { showFallback("O microfone só funciona em HTTPS (ou abrindo o arquivo diretamente no Chrome)."); return; }
+  if (S.conv || S.status === "connecting") return;
+  S.status = "connecting"; render(); dag("Pedindo acesso ao microfone...");
+  try { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach((t) => t.stop()); }
+  catch (e) { S.status = "disconnected"; render(); dag("Microfone negado.", "text-rose-300"); showFallback("O navegador bloqueou o microfone. Permita o acesso no ícone do cadeado e tente de novo."); return; }
+  let mod;
+  try { mod = await loadSDK(); }
+  catch (e) { S.status = "disconnected"; render(); showFallback("Não consegui carregar o módulo de voz do ElevenLabs. Use o link direto ou o widget."); return; }
+  const opts = {
+    agentId: AGENT_ID,
+    onConnect: ({ conversationId }) => {
+      S.start = Date.now(); dag("Ligado ao Jarvis · sessão " + String(conversationId || "").slice(-6).toUpperCase(), "text-emerald-300");
+      addChat("sys", "Conexão estabelecida.");
+      setStep(2, "Agente Jarvis · ligado", true);
+      const mem = LS.get("memory", []);
+      if (mem.length) { try { S.conv && S.conv.sendContextualUpdate("Notas do Marcelo guardadas no painel: " + mem.join(" | ")); dag("Matriz de memória enviada como contexto (" + mem.length + ")."); } catch (e) {} }
+    },
+    onDisconnect: (d) => {
+      const why = d && d.reason === "error" ? "Erro: " + (d.message || "") : d && d.reason === "agent" ? "Sessão encerrada pelo Jarvis." : "Sessão encerrada.";
+      addChat("sys", why); dag(why, "text-amber-300"); endSession(true);
+    },
+    onStatusChange: ({ status }) => { S.status = status; render(); },
+    onModeChange: ({ mode }) => {
+      const prev = S.mode; S.mode = mode; render();
+      if (prev === "speaking" && mode === "listening") maybeRunNextMission();
+    },
+    onMessage: (m) => {
+      if (!m || !m.message) return;
+      const role = m.role || (m.source === "user" ? "user" : "agent");
+      addChat(role === "user" ? "user" : "agent", m.message);
+      if (role === "user") { setStep(1, m.message.slice(0, 40), true); setTimeout(() => setStep(1, "Aguardando ordem", false), 2500); }
+      else onAgentMessage(m.message);
+    },
+    onError: (msg) => { dag("Erro: " + msg, "text-rose-300"); toast("⚠️ " + msg); }
+  };
+  try { S.conv = await mod.Conversation.startSession({ ...opts, connectionType: "webrtc" }); }
+  catch (e1) {
+    try { S.conv = await mod.Conversation.startSession({ ...opts, connectionType: "websocket" }); }
+    catch (e2) { S.conv = null; S.status = "disconnected"; render(); showFallback("Não consegui ligar ao Jarvis (" + ((e2 && e2.message) || "erro desconhecido") + "). Use o link direto do ElevenLabs."); return; }
+  }
+  if (S.voiceMuted) { try { S.conv.setVolume({ volume: 0 }); } catch (e) {} }
+}
+function endSession(fromSdk) {
+  const c = S.conv; S.conv = null;
+  if (c && !fromSdk) { try { c.endSession(); } catch (e) {} }
+  S.status = "disconnected"; S.mode = "idle"; S.start = 0; S.micMuted = false; S.pending = [];
+  setStep(2, "Agente Jarvis", false); render(); tickClock();
+}
+function toggleSession() { if (S.conv || S.status === "connecting") { endSession(false); dag("Sessão encerrada por você."); } else startSession(); }
+$("btn-mic").onclick = toggleSession;
+$("reactor-wrap").onclick = () => { if (!S.conv && S.status !== "connecting") startSession(); };
+$("btn-handsfree").onclick = () => {
+  if (!S.conv) return; S.micMuted = !S.micMuted;
+  try { S.conv.setMicMuted(S.micMuted); } catch (e) {}
+  toast(S.micMuted ? "👂 Microfone silenciado" : "👂 Microfone ativo"); render();
+};
+$("btn-mute").onclick = () => {
+  S.voiceMuted = !S.voiceMuted; $("btn-mute").textContent = S.voiceMuted ? "🔇" : "🔊";
+  if (S.conv) { try { S.conv.setVolume({ volume: S.voiceMuted ? 0 : 1 }); } catch (e) {} }
+  toast(S.voiceMuted ? "🔇 Voz do Jarvis silenciada" : "🔊 Voz do Jarvis ativa");
+};
+addEventListener("beforeunload", () => { if (S.conv) try { S.conv.endSession(); } catch (e) {} });
+
+/* Enviar texto ao Jarvis (só com sessão ativa) */
+function sendToJarvis(text, target) {
+  text = String(text || "").trim();
+  if (!text) { toast("Escreva um comando primeiro"); return false; }
+  if (!S.conv || S.status !== "connected") { toast("⚡ Ative o Jarvis primeiro (🎙️)"); return false; }
+  try { S.conv.sendUserMessage(text); }
+  catch (e) { toast("Falha ao enviar: " + e.message); return false; }
+  if (target) S.pending.push(target);
+  addChat("user", text);
+  setStep(1, text.slice(0, 40), true); setTimeout(() => setStep(1, "Aguardando ordem", false), 2500);
+  dag("→ Jarvis: " + text.slice(0, 80));
+  return true;
+}
+$("btn-replay-voice").onclick = () => sendToJarvis("Podes repetir a tua última resposta, por favor?");
+
+/* Barra de comando */
+$("cmd-form").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("cmd-input").value;
+  if (sendToJarvis(v)) $("cmd-input").value = "";
+};
+$("cmd-input").addEventListener("input", () => { if (S.conv) try { S.conv.sendUserActivity(); } catch (e) {} });
+$$(".quick-cmd").forEach((b) => b.onclick = () => {
+  if (b.dataset.action === "music") return openModal("modal-music");
+  if (b.dataset.action === "image") return openModal("modal-image");
+  $("cmd-input").value = b.dataset.quick; $("cmd-input").focus();
+});
+
+/* ==================== FILA AUTÔNOMA ==================== */
+S.missions = LS.get("missions", []);
+function renderMissions() {
+  $("auto-queue-count").textContent = S.missions.length + (S.missions.length === 1 ? " missão" : " missões");
+  $("auto-mission-list").innerHTML = S.missions.map((m, i) =>
+    '<div class="flex items-center gap-1.5 rounded-lg bg-black/40 border border-cyan-500/15 px-2 py-1"><span class="flex-1 truncate">' + esc(m) +
+    '</span><button data-run="' + i + '" class="text-emerald-300 hover:text-white" title="Enviar agora">▶</button><button data-del="' + i + '" class="text-rose-300 hover:text-white" title="Remover">✕</button></div>').join("");
+  LS.set("missions", S.missions);
+}
+$("auto-mission-list").onclick = (e) => {
+  const r = e.target.dataset.run, d = e.target.dataset.del;
+  if (r !== undefined) { if (sendToJarvis(S.missions[+r])) { S.missions.splice(+r, 1); renderMissions(); } }
+  if (d !== undefined) { S.missions.splice(+d, 1); renderMissions(); }
+};
+function addMission() { const v = $("auto-mission-input").value.trim(); if (!v) return; S.missions.push(v); $("auto-mission-input").value = ""; renderMissions(); toast("🤖 Missão adicionada"); maybeRunNextMission(); }
+$("btn-add-mission").onclick = addMission;
+$("auto-mission-input").onkeydown = (e) => { if (e.key === "Enter") addMission(); };
+function maybeRunNextMission() {
+  if (!S.auto || !S.missions.length || S.status !== "connected" || S.mode === "speaking" || S.pending.length) return;
+  const m = S.missions.shift(); renderMissions(); dag("🤖 Missão autônoma enviada.", "text-emerald-300"); sendToJarvis(m);
+}
+$("btn-auto-toggle").onclick = () => {
+  S.auto = !S.auto; $("btn-auto-toggle").classList.toggle("active", S.auto);
+  $("btn-auto-toggle").textContent = "🤖 AUTO: " + (S.auto ? "ON" : "OFF");
+  toast(S.auto ? "Fila autônoma ligada" : "Fila autônoma desligada"); maybeRunNextMission();
+};
+renderMissions();
+
+/* ==================== DIRETIVAS & MEMÓRIA ==================== */
+let tasks = LS.get("tasks", []), memory = LS.get("memory", []);
+function renderTasks() {
+  const html = tasks.map((t, i) =>
+    '<div class="flex items-center gap-1.5 rounded-lg bg-black/40 border border-cyan-500/15 px-2 py-1"><input type="checkbox" data-tchk="' + i + '"' + (t.done ? " checked" : "") +
+    ' class="accent-cyan-400"><span class="flex-1 truncate ' + (t.done ? "line-through text-cyan-300/40" : "") + '">' + esc(t.text) + '</span><button data-tdel="' + i + '" class="text-rose-300">✕</button></div>').join("") ||
+    '<div class="text-cyan-300/40">Sem diretivas.</div>';
+  $("task-list").innerHTML = html; $("desktop-tasks-preview").innerHTML = html;
+  const open = tasks.filter((t) => !t.done).length;
+  $("sys-summary-badge").textContent = open + (open === 1 ? " tarefa" : " tarefas");
+  LS.set("tasks", tasks);
+}
+function taskClick(e) {
+  const c = e.target.dataset.tchk, d = e.target.dataset.tdel;
+  if (c !== undefined) { tasks[+c].done = e.target.checked; renderTasks(); }
+  if (d !== undefined) { tasks.splice(+d, 1); renderTasks(); }
+}
+$("task-list").onclick = taskClick; $("desktop-tasks-preview").onclick = taskClick;
+function addTask(inp) { const v = $(inp).value.trim(); if (!v) return; tasks.push({ text: v, done: false }); $(inp).value = ""; renderTasks(); }
+$("btn-add-task").onclick = () => addTask("task-input");
+$("btn-add-task-d").onclick = () => addTask("task-input-d");
+$("task-input").onkeydown = (e) => { if (e.key === "Enter") addTask("task-input"); };
+$("task-input-d").onkeydown = (e) => { if (e.key === "Enter") addTask("task-input-d"); };
+function renderMemory() {
+  $("memory-list").innerHTML = memory.map((m, i) => '<div class="flex gap-1.5"><span class="flex-1">• ' + esc(m) + '</span><button data-mdel="' + i + '" class="text-rose-300">✕</button></div>').join("") || '<div class="text-cyan-300/40">Sem notas.</div>';
+  LS.set("memory", memory);
+}
+$("memory-list").onclick = (e) => { const d = e.target.dataset.mdel; if (d !== undefined) { memory.splice(+d, 1); renderMemory(); } };
+$("btn-add-memory").onclick = () => {
+  const v = $("memory-input").value.trim(); if (!v) return; memory.push(v); $("memory-input").value = ""; renderMemory();
+  if (S.conv) { try { S.conv.sendContextualUpdate("Nova nota do Marcelo: " + v); toast("🧬 Nota enviada ao Jarvis"); } catch (e) {} }
+};
+renderTasks(); renderMemory();
+
+/* ==================== MODAIS & ABAS ==================== */
+function openModal(id) { $(id).classList.remove("hidden"); }
+function closeModal(id) { $(id).classList.add("hidden"); }
+$$("[data-close]").forEach((b) => b.onclick = () => closeModal(b.dataset.close));
+$$("#modal-skills, #modal-creator, #modal-music, #modal-image, #modal-studio").forEach((m) => m.addEventListener("click", (e) => { if (e.target === m) closeModal(m.id); }));
+addEventListener("keydown", (e) => { if (e.key === "Escape") $$("[id^=modal-]").forEach((m) => m.classList.add("hidden")); });
+$("btn-open-skills").onclick = () => openModal("modal-skills");
+$("btn-open-creator").onclick = () => { openModal("modal-creator"); showCTab("ctab-campaign"); };
+$("btn-open-capcut").onclick = () => { openModal("modal-creator"); showCTab("ctab-capcut"); };
+$("btn-open-music").onclick = () => openModal("modal-music");
+$("btn-open-image").onclick = () => openModal("modal-image");
+$("btn-open-studio").onclick = () => openModal("modal-studio");
+$$(".mobile-tab").forEach((b) => b.onclick = () => {
+  $$(".mobile-tab").forEach((x) => x.classList.toggle("active", x === b));
+  $$(".hud-pane").forEach((p) => p.classList.toggle("mobile-active", p.id === b.dataset.pane));
+  resizeAll();
+});
+function showCTab(id) {
+  $$(".ctab-panel").forEach((p) => p.classList.toggle("hidden", p.id !== id));
+  $$(".ctab-btn").forEach((b) => b.classList.toggle("active", b.dataset.ctab === id));
+}
+$$(".ctab-btn").forEach((b) => b.onclick = () => showCTab(b.dataset.ctab));
+
+/* ==================== CATÁLOGO DE HABILIDADES ==================== */
+$("skills-grid").innerHTML = CATALOGO_DE_HABILIDADES.map((s) =>
+  '<div class="rounded-xl bg-black/45 border border-cyan-500/25 p-2.5 flex flex-col gap-1.5">' +
+  '<div class="flex items-center justify-between gap-2"><span class="font-orbitron text-[11px] font-bold hud-glow-text">' + esc(s.nome) + '</span>' +
+  '<span class="font-mono-tech text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">' + esc(s.cat) + '</span></div>' +
+  '<div class="text-[11px] text-cyan-100/75 leading-snug">' + esc(s.desc) + '</div>' +
+  '<div class="font-mono-tech text-[9px] text-cyan-300/60 truncate">' + esc(s.cmd) + '…</div>' +
+  '<div class="flex gap-1.5"><button data-skill="' + s.id + '" data-mode="send" class="cyber-btn px-2.5 py-1 rounded-lg font-mono-tech text-[10px] font-bold">⚡ ENVIAR AO JARVIS</button>' +
+  '<button data-skill="' + s.id + '" data-mode="fill" class="cyber-btn px-2.5 py-1 rounded-lg font-mono-tech text-[10px]">✎ EDITAR</button></div></div>').join("");
+$("skills-grid").onclick = (e) => {
+  const b = e.target.closest("[data-skill]"); if (!b) return;
+  const s = CATALOGO_DE_HABILIDADES.find((x) => x.id === b.dataset.skill);
+  const arg = $("skill-arg").value.trim();
+  const text = s.cmd + arg;
+  if (b.dataset.mode === "fill" || !arg) {
+    $("cmd-input").value = text; closeModal("modal-skills"); $("cmd-input").focus();
+    if (b.dataset.mode !== "fill") toast("Complete o comando e carregue em ENVIAR");
+    return;
+  }
+  if (sendToJarvis(text)) { closeModal("modal-skills"); toast("⚡ " + s.nome + " enviado"); }
+};
+
+/* ==================== CRIADOR: CAMPANHA ==================== */
+const ASK = {
+  yt: { field: "out-yt", label: "YouTube", prompt: (t) => "Escreve um título, uma descrição curta e 10 tags de YouTube para um vídeo sobre: " + t + ". Responde só com o texto." },
+  tt: { field: "out-tt", label: "TikTok", prompt: (t) => "Escreve uma legenda de TikTok curta e viral com hashtags para um vídeo sobre: " + t + ". Responde só com o texto." },
+  fb: { field: "out-fb", label: "Facebook", prompt: (t) => "Escreve uma publicação de Facebook envolvente sobre: " + t + ". Responde só com o texto." }
+};
+function topic() { const t = $("creator-topic").value.trim(); if (!t) toast("Escreva primeiro o tema"); return t; }
+$$(".ask-field").forEach((b) => b.onclick = () => {
+  const t = topic(); if (!t) return; const a = ASK[b.dataset.ask];
+  if (sendToJarvis(a.prompt(t), { field: a.field, label: a.label })) toast("🧠 Pedido enviado ao Jarvis");
+});
+$("btn-creator-gen-all").onclick = () => {
+  const t = topic(); if (!t) return;
+  const order = ["yt", "tt", "fb"];
+  const step = (i) => {
+    if (i >= order.length) return;
+    const a = ASK[order[i]];
+    sendToJarvis(a.prompt(t), { field: a.field, label: a.label, next: () => step(i + 1) });
+  };
+  if (S.status !== "connected") { toast("⚡ Ative o Jarvis primeiro (🎙️)"); return; }
+  step(0); toast("🚀 A pedir os 3 textos ao Jarvis, um de cada vez");
+};
+$$(".copy-field").forEach((b) => b.onclick = () => copyText($(b.dataset.copy).value));
+
+/* Pollinations.ai: geração de imagens gratuita, sem chave */
+function pollinationsURL(prompt, w, h) {
+  return "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) + "?width=" + w + "&height=" + h + "&nologo=true&seed=" + Math.floor(Math.random() * 1e6);
+}
+function loadImg(src, crossOrigin) {
+  return new Promise((res, rej) => { const i = new Image(); if (crossOrigin) i.crossOrigin = "anonymous"; i.onload = () => res(i); i.onerror = () => rej(new Error("imagem")); i.src = src; });
+}
+$("btn-creator-thumb").onclick = async () => {
+  const t = topic(); if (!t) return;
+  const url = pollinationsURL("YouTube thumbnail, cinematic, high contrast, vibrant, no text: " + t, 1280, 720);
+  $("thumb-preview-wrap").textContent = "A gerar...";
+  try { const img = await loadImg(url); img.className = "w-full h-full object-cover"; $("thumb-preview-wrap").innerHTML = ""; $("thumb-preview-wrap").append(img);
+    $("btn-download-thumb").href = url; $("btn-download-thumb").classList.remove("hidden"); toast("🖼️ Miniatura pronta"); }
+  catch (e) { $("thumb-preview-wrap").textContent = "Falhou. Tente de novo."; }
+};
+
+/* ==================== CRIADOR: VÍDEO DE CENAS ==================== */
+const vc = $("creator-video-canvas"), vx = vc.getContext("2d");
+let sceneImgs = [], previewing = false;
+function scenes() { return $("video-scenes-input").value.split("\n").map((s) => s.trim()).filter(Boolean); }
+function setAspect() { if ($("video-aspect").value === "9:16") { vc.width = 360; vc.height = 640; } else { vc.width = 640; vc.height = 360; } }
+$("video-aspect").onchange = () => { setAspect(); sceneImgs = []; drawScene(0, 0); };
+function wrapText(text, x, y, maxW, lh) {
+  const words = text.split(" "); let line = "", lines = [];
+  for (const w of words) { const test = line ? line + " " + w : w; if (vx.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test; }
+  lines.push(line); const top = y - (lines.length - 1) * lh / 2;
+  lines.forEach((l, i) => vx.fillText(l, x, top + i * lh));
+}
+function drawScene(i, p) {
+  const list = scenes(); const W = vc.width, H = vc.height;
+  const cs = getComputedStyle(document.documentElement); const r = cs.getPropertyValue("--hud-r"), g = cs.getPropertyValue("--hud-g"), b = cs.getPropertyValue("--hud-b");
+  vx.fillStyle = "#010612"; vx.fillRect(0, 0, W, H);
+  const img = sceneImgs[i];
+  if (img) { const z = 1 + p * 0.08; const s = Math.max(W / img.width, H / img.height) * z; vx.drawImage(img, (W - img.width * s) / 2, (H - img.height * s) / 2, img.width * s, img.height * s); }
+  else { const gr = vx.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, Math.max(W, H) * (0.5 + p * 0.3)); gr.addColorStop(0, "rgba(" + r + "," + g + "," + b + ",0.55)"); gr.addColorStop(1, "rgba(1,6,18,1)"); vx.fillStyle = gr; vx.fillRect(0, 0, W, H); }
+  vx.fillStyle = "rgba(0,0,0,0.45)"; vx.fillRect(0, H * 0.68, W, H * 0.24);
+  vx.fillStyle = "#ffffff"; vx.font = "700 " + Math.round(W / 18) + "px Inter, sans-serif"; vx.textAlign = "center"; vx.textBaseline = "middle";
+  vx.globalAlpha = Math.min(1, p * 4, (1 - p) * 4 + 0.2);
+  wrapText(list[i] || "Escreva as cenas", W / 2, H * 0.8, W * 0.86, W / 14); vx.globalAlpha = 1;
+  vx.fillStyle = "rgba(" + r + "," + g + "," + b + ",0.9)"; vx.fillRect(0, H - 4, W * ((i + p) / Math.max(1, list.length)), 4);
+}
+setAspect(); drawScene(0, 0);
+$("btn-gen-scenes").onclick = async () => {
+  const list = scenes(); if (!list.length) return toast("Escreva pelo menos uma cena");
+  const [w, h] = $("video-aspect").value === "9:16" ? [576, 1024] : [1024, 576];
+  $("video-status").textContent = "A gerar " + list.length + " imagens no Pollinations.ai...";
+  let ok = 0;
+  sceneImgs = await Promise.all(list.map((s) => loadImg(pollinationsURL("photorealistic cinematic scene, " + s, w, h), true).then((i) => { ok++; $("video-status").textContent = "Imagens prontas: " + ok + "/" + list.length; return i; }).catch(() => null)));
+  $("video-status").textContent = ok + "/" + list.length + " imagens prontas. Use PRÉ-VISUALIZAR ou GRAVAR.";
+  drawScene(0, 0);
+};
+function playScenes(onFrame) {
+  return new Promise((res) => {
+    const list = scenes(), dur = 3000, t0 = performance.now();
+    const loop = (t) => { const el = t - t0, i = Math.floor(el / dur); if (i >= list.length) { res(); return; } drawScene(i, (el % dur) / dur); if (onFrame) onFrame(); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+}
+$("btn-preview-video").onclick = async () => { if (previewing) return; previewing = true; await playScenes(); previewing = false; };
+$("btn-record-video").onclick = async () => {
+  if (previewing) return; if (!vc.captureStream || !window.MediaRecorder) return toast("Este navegador não grava vídeo");
+  previewing = true; $("video-status").textContent = "⏺ A gravar...";
+  const stream = vc.captureStream(30), chunks = [];
+  let rec;
+  try { rec = new MediaRecorder(stream, { mimeType: "video/webm" }); } catch (e) { rec = new MediaRecorder(stream); }
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const done = new Promise((r) => rec.onstop = r);
+  rec.start();
+  try { await playScenes(); } finally { rec.stop(); }
+  await done; previewing = false;
+  try {
+    const url = URL.createObjectURL(new Blob(chunks, { type: "video/webm" }));
+    $("recorded-video-el").src = url; $("recorded-video-dl").href = url; $("recorded-video-wrap").classList.remove("hidden");
+    $("video-status").textContent = "✅ Vídeo pronto (.webm).";
+  } catch (e) { $("video-status").textContent = "Não foi possível gravar (imagens sem permissão de canvas?)."; }
+};
+
+/* ==================== CRIADOR: CAPCUT ==================== */
+let capProject = null;
+const FX = ["Corte seco", "Zoom in", "Deslizar", "Dissolver", "Glitch", "Flash branco"];
+function srtTime(ms) { const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60, x = ms % 1000; return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":") + "," + String(x).padStart(3, "0"); }
+function buildCapcut() {
+  const lines = $("capcut-script").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  if (!lines.length) { toast("Escreva o roteiro (1 fala por linha)"); return null; }
+  let t = 0;
+  const clips = lines.map((text, i) => { const words = text.split(/\s+/).length; const dur = Math.max(1500, Math.round(words / 2.6 * 1000)); const c = { index: i + 1, start: t, end: t + dur, text, transition: i ? FX[i % FX.length] : "Abertura" }; t += dur; return c; });
+  capProject = { app: "ARQUITETO", tema: $("creator-topic").value.trim(), formato: $("video-aspect").value, duracao_ms: t, clips };
+  $("capcut-timeline").innerHTML = clips.map((c) => '<div class="rounded-lg bg-black/40 border border-cyan-500/20 p-1.5"><div class="text-cyan-300">#' + c.index + " · " + srtTime(c.start).slice(3, 8) + " → " + srtTime(c.end).slice(3, 8) + " · " + esc(c.transition) + '</div><div class="text-cyan-50/90">' + esc(c.text) + "</div></div>").join("") +
+    '<div class="text-cyan-300/60">Duração total ≈ ' + Math.round(t / 1000) + "s (estimativa: ~2,6 palavras por segundo).</div>";
+  return capProject;
+}
+$("btn-capcut-build").onclick = () => { if (buildCapcut()) toast("✂️ Timeline gerada"); };
+$("btn-capcut-ask").onclick = () => {
+  const t = topic(); if (!t) return;
+  sendToJarvis("Escreve um roteiro curto para um vídeo de CapCut sobre: " + t + ". Uma fala por linha, no máximo 8 linhas, sem numeração.", { field: "capcut-script", label: "roteiro CapCut" });
+};
+$("btn-capcut-srt").onclick = () => { const p = buildCapcut(); if (!p) return; download("legendas-arquiteto.srt", p.clips.map((c) => c.index + "\n" + srtTime(c.start) + " --> " + srtTime(c.end) + "\n" + c.text + "\n").join("\n")); };
+$("btn-capcut-json").onclick = () => { const p = buildCapcut(); if (!p) return; download("projeto-capcut-arquiteto.json", JSON.stringify(p, null, 2), "application/json"); };
+$("btn-capcut-open").onclick = () => { copyText($("capcut-script").value); window.open("https://www.capcut.com/editor", "_blank", "noopener"); };
+
+/* ==================== CANAIS & AGENDA ==================== */
+const ch = LS.get("channels", {}); $("ch-yt").value = ch.yt || ""; $("ch-tt").value = ch.tt || ""; $("ch-fb").value = ch.fb || "";
+$("btn-save-channels").onclick = () => { LS.set("channels", { yt: $("ch-yt").value.trim(), tt: $("ch-tt").value.trim(), fb: $("ch-fb").value.trim() }); toast("💾 Canais guardados neste navegador"); };
+let agenda = LS.get("agenda", []);
+function renderAgenda() {
+  $("schedule-list").innerHTML = agenda.map((a, i) => '<div class="flex items-center gap-2 rounded-lg bg-black/40 border border-cyan-500/20 px-2 py-1"><span class="text-cyan-300">' + esc(a.when.replace("T", " ")) + '</span><span class="flex-1 truncate">' + esc(a.tema || "(sem tema)") + '</span><button data-adel="' + i + '" class="text-rose-300">✕</button></div>').join("") || '<div class="text-cyan-300/40">Agenda vazia.</div>';
+  LS.set("agenda", agenda);
+}
+$("schedule-list").onclick = (e) => { const d = e.target.dataset.adel; if (d !== undefined) { agenda.splice(+d, 1); renderAgenda(); } };
+$("btn-schedule-campaign").onclick = () => {
+  const when = $("schedule-at").value; if (!when) return toast("Escolha a data e hora");
+  agenda.push({ when, tema: $("creator-topic").value.trim() }); agenda.sort((a, b) => a.when.localeCompare(b.when)); renderAgenda(); toast("📅 Anotado na agenda");
+};
+renderAgenda();
+
+/* ==================== YOUTUBE & MÚSICA ==================== */
+const audio = $("direct-audio-player");
+let localQueue = [], localIdx = -1;
+function ytId(s) {
+  const m = String(s).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function playYouTube(id) {
+  audio.pause();
+  $("yt-player-wrap").innerHTML = '<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0" title="YouTube" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  $("music-track-title").textContent = "Vídeo do YouTube"; $("music-track-artist").textContent = "youtu.be/" + id; $("music-status").textContent = "▶ A reproduzir no player";
+  $("mini-music-bar").classList.add("hidden");
+}
+$("btn-music-search").onclick = () => {
+  const q = $("music-query-input").value.trim(); if (!q) return toast("Escreva uma pesquisa ou cole um link");
+  const id = ytId(q);
+  if (id) playYouTube(id);
+  else { window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent(q), "_blank", "noopener"); $("music-status").textContent = "Pesquisa aberta numa nova aba. Cole aqui o link do vídeo para tocar dentro do painel."; }
+};
+$("music-query-input").onkeydown = (e) => { if (e.key === "Enter") $("btn-music-search").click(); };
+function renderLocalQueue() {
+  $("music-results-list").innerHTML = localQueue.map((f, i) => '<button data-li="' + i + '" class="w-full text-left cyber-btn px-2.5 py-1.5 rounded-lg font-mono-tech text-[10px] truncate ' + (i === localIdx ? "active" : "") + '">' + (i === localIdx ? "▶ " : "♪ ") + esc(f.name) + "</button>").join("") || '<div class="font-mono-tech text-[10px] text-cyan-300/40">Sem arquivos locais.</div>';
+}
+function playLocal(i) {
+  if (!localQueue.length) return; localIdx = (i + localQueue.length) % localQueue.length;
+  const f = localQueue[localIdx]; if (audio.dataset.url) URL.revokeObjectURL(audio.dataset.url);
+  audio.dataset.url = URL.createObjectURL(f); audio.src = audio.dataset.url; audio.classList.remove("hidden");
+  audio.play().catch(() => toast("Toque em ⏯ para iniciar o som"));
+  $("yt-player-wrap").innerHTML = "Cole um link do YouTube para tocar aqui";
+  $("music-track-title").textContent = f.name; $("music-track-artist").textContent = "Arquivo local"; $("mini-music-title").textContent = f.name;
+  $("mini-music-bar").classList.remove("hidden"); renderLocalQueue();
+}
+$("music-local-file").onchange = (e) => { localQueue = Array.from(e.target.files || []); if (localQueue.length) playLocal(0); renderLocalQueue(); };
+$("music-results-list").onclick = (e) => { const b = e.target.closest("[data-li]"); if (b) playLocal(+b.dataset.li); };
+audio.onplay = () => { $("music-status").textContent = "▶ A reproduzir"; $("mini-music-status").textContent = "▶ A reproduzir"; };
+audio.onpause = () => { $("music-status").textContent = "⏸ Pausado"; $("mini-music-status").textContent = "⏸ Pausado"; };
+audio.onended = () => playLocal(localIdx + 1);
+function playPause() { if (!audio.src) return toast("Sem faixa local"); audio.paused ? audio.play() : audio.pause(); }
+$("btn-music-playpause").onclick = playPause; $("btn-mini-playpause").onclick = playPause;
+$("btn-music-next").onclick = () => playLocal(localIdx + 1); $("btn-mini-next").onclick = () => playLocal(localIdx + 1);
+$("btn-music-prev").onclick = () => playLocal(localIdx - 1);
+$("btn-mini-open").onclick = () => openModal("modal-music");
+$("btn-mini-stop").onclick = () => { audio.pause(); audio.currentTime = 0; $("mini-music-bar").classList.add("hidden"); };
+renderLocalQueue();
+
+/* ==================== PROJETOR DE IMAGENS ==================== */
+$("btn-gen-image").onclick = async () => {
+  const p = $("image-prompt-input").value.trim(); if (!p) return toast("Descreva a imagem");
+  const url = pollinationsURL(p, 1024, 1024);
+  $("image-stage").textContent = "🎨 A sintetizar no Pollinations.ai...";
+  try { const img = await loadImg(url); img.className = "max-h-[60vh] rounded-lg"; $("image-stage").innerHTML = ""; $("image-stage").append(img);
+    $("btn-download-image").href = url; $("btn-download-image").classList.remove("hidden"); }
+  catch (e) { $("image-stage").textContent = "Falhou. Tente outra vez daqui a pouco."; }
+};
+$("image-prompt-input").onkeydown = (e) => { if (e.key === "Enter") $("btn-gen-image").click(); };
+
+/* ==================== ESTÚDIO AO VIVO ==================== */
+$("studio-code").value = LS.get("studio", `<!DOCTYPE html>
+<html><body style="margin:0;background:#020617;color:#22d3ee;font-family:sans-serif;display:grid;place-items:center;height:100vh">
+<div style="text-align:center"><h1>Clique no círculo!</h1><div id="c" style="width:90px;height:90px;border-radius:50%;background:#22d3ee;margin:auto;cursor:pointer;box-shadow:0 0 30px #22d3ee"></div><p id="p">Pontos: 0</p></div>
+<script>let n=0;const c=document.getElementById('c');c.onclick=()=>{n++;document.getElementById('p').textContent='Pontos: '+n;c.style.transform='translate('+(Math.random()*200-100)+'px,'+(Math.random()*120-60)+'px)';};<\/script>
+</body></html>`);
+$("btn-studio-run").onclick = () => { $("studio-preview").srcdoc = $("studio-code").value; LS.set("studio", $("studio-code").value); };
+$("btn-studio-copy").onclick = () => copyText($("studio-code").value);
+$("btn-studio-run").click();
+
+/* ==================== CÂMERA NA CÂMARA HOLOGRÁFICA ==================== */
+$("btn-camera").onclick = async () => {
+  const v = $("cam-video");
+  if (S.camStream) { S.camStream.getTracks().forEach((t) => t.stop()); S.camStream = null; v.srcObject = null; v.classList.add("hidden"); $("btn-camera").classList.remove("active"); $("tel-flux").textContent = "DESLIGADA"; return; }
+  try {
+    S.camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+    v.srcObject = S.camStream; v.classList.remove("hidden"); $("btn-camera").classList.add("active"); $("tel-flux").textContent = "LIGADA"; toast("📷 Câmera ligada (só local, não é enviada)");
+  } catch (e) { toast("📷 Câmera indisponível ou bloqueada"); }
+};
+
+/* ==================== FUNDO: CONSTELAÇÃO NEURAL ==================== */
+const bg = $("bg-canvas"), bx = bg.getContext("2d"); let BW = 0, BH = 0, nodes = [];
+const rc = $("reactor-canvas"), rx = rc.getContext("2d");
+const wc = $("wave-canvas"), wx = wc.getContext("2d");
+function fit(c) { const dpr = Math.min(devicePixelRatio || 1, 2); const r = c.getBoundingClientRect(); c.width = Math.max(1, r.width * dpr); c.height = Math.max(1, r.height * dpr); }
+function resizeAll() {
+  const dpr = Math.min(devicePixelRatio || 1, 2); BW = bg.width = innerWidth * dpr; BH = bg.height = innerHeight * dpr;
+  const n = Math.min(90, Math.floor(innerWidth * innerHeight / 16000));
+  nodes = Array.from({ length: n }, () => ({ x: Math.random() * BW, y: Math.random() * BH, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3 }));
+  fit(rc); fit(wc);
+}
+addEventListener("resize", resizeAll); resizeAll();
+
+/* Busto humanoide em pontos (gerado proceduralmente) */
+const bust = [];
+(function buildBust() {
+  for (let i = 0; i < 260; i++) { // cabeça (elipsoide)
+    const t = Math.random() * Math.PI * 2, u = Math.acos(2 * Math.random() - 1);
+    bust.push({ x: 0.16 * Math.sin(u) * Math.cos(t), y: -0.30 + 0.21 * Math.cos(u), z: 0.15 * Math.sin(u) * Math.sin(t) });
+  }
+  for (let i = 0; i < 50; i++) { const t = Math.random() * Math.PI * 2; bust.push({ x: 0.07 * Math.cos(t), y: -0.08 + Math.random() * 0.1, z: 0.07 * Math.sin(t) }); } // pescoço
+  for (let i = 0; i < 320; i++) { // ombros e peito
+    const t = Math.random() * Math.PI * 2, h = Math.random();
+    const w = 0.18 + 0.24 * Math.sqrt(h);
+    bust.push({ x: w * Math.cos(t), y: 0.02 + h * 0.34, z: 0.14 * Math.sin(t) });
+  }
+})();
+
+function cssRGB() { const cs = getComputedStyle(document.documentElement); return [cs.getPropertyValue("--hud-r").trim(), cs.getPropertyValue("--hud-g").trim(), cs.getPropertyValue("--hud-b").trim()].join(","); }
+let freq = new Uint8Array(64);
+
+function frame(t) {
+  const s = t / 1000;
+  if (S.prisma) { const [r, g, b] = hsl2rgb((s * 30) % 360, 0.85, 0.58); applyRGB(r, g, b); }
+  const RGB = cssRGB(), C = (a) => "rgba(" + RGB + "," + a + ")";
+  const live = S.status === "connected", speaking = live && S.mode === "speaking";
+
+  /* volumes reais */
+  let iv = 0, ov = 0;
+  if (S.conv && live) {
+    try { iv = S.conv.getInputVolume() || 0; ov = S.conv.getOutputVolume() || 0; } catch (e) {}
+    try { const d = speaking ? S.conv.getOutputByteFrequencyData() : S.conv.getInputByteFrequencyData(); if (d && d.length) freq = d; } catch (e) {}
+  } else freq = null;
+  S.inV += (iv - S.inV) * 0.25; S.outV += (ov - S.outV) * 0.25;
+  $("tel-az").textContent = Math.round(Math.min(1, S.inV) * 100) + "%";
+  $("tel-el").textContent = Math.round(Math.min(1, S.outV) * 100) + "%";
+  const lvl = Math.min(1, (speaking ? S.outV : S.inV) * 1.6);
+  const energy = live ? Math.max(0.15, lvl) : S.status === "connecting" ? 0.35 + 0.25 * Math.sin(s * 8) : 0.08 + 0.05 * Math.sin(s);
+
+  /* fundo */
+  bx.clearRect(0, 0, BW, BH);
+  for (const n of nodes) { n.x += n.vx; n.y += n.vy; if (n.x < 0 || n.x > BW) n.vx *= -1; if (n.y < 0 || n.y > BH) n.vy *= -1; }
+  const maxD = 140 * (devicePixelRatio || 1);
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i]; bx.fillStyle = C(0.5); bx.fillRect(a.x - 1, a.y - 1, 2, 2);
+    for (let j = i + 1; j < nodes.length; j++) { const b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+      if (d < maxD) { bx.strokeStyle = C(0.12 * (1 - d / maxD)); bx.beginPath(); bx.moveTo(a.x, a.y); bx.lineTo(b.x, b.y); bx.stroke(); } }
+  }
+
+  /* câmara: anéis + busto */
+  const W = rc.width, H = rc.height, cx = W / 2, cy = H * 0.52, R = Math.min(W, H) * 0.46;
+  rx.clearRect(0, 0, W, H);
+  /* chão holográfico em perspetiva */
+  rx.strokeStyle = C(0.12); rx.lineWidth = 1;
+  for (let i = 1; i <= 8; i++) { const y = H * 0.78 + i * i * H * 0.004; rx.beginPath(); rx.ellipse(cx, H * 0.86, R * (0.25 + i * 0.12), R * (0.04 + i * 0.018), 0, 0, Math.PI * 2); rx.stroke(); }
+  /* anéis segmentados */
+  [[1.0, 0.15, 40, 1.5], [0.88, -0.3, 6, 3], [0.8, 0.45, 3, 2]].forEach(([k, sp, seg, w]) => {
+    const off = s * sp * (1 + energy * 2);
+    for (let i = 0; i < seg; i++) { const a0 = off + (i / seg) * Math.PI * 2, a1 = a0 + (Math.PI * 2 / seg) * 0.72;
+      rx.beginPath(); rx.arc(cx, cy, R * k, a0, a1); rx.lineWidth = w * (W / 700); rx.strokeStyle = C(0.25 + energy * 0.5); rx.shadowBlur = 10; rx.shadowColor = C(1); rx.stroke(); }
+  });
+  rx.shadowBlur = 0;
+  /* espectro circular de áudio real */
+  const N = 72;
+  for (let i = 0; i < N; i++) {
+    const v = freq ? (freq[Math.floor(i / N * freq.length * 0.6)] || 0) / 255 : 0.03 + 0.02 * Math.sin(s * 2 + i);
+    const a = (i / N) * Math.PI * 2 - Math.PI / 2, r0 = R * 0.7, r1 = r0 + R * 0.16 * v + 2;
+    rx.beginPath(); rx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); rx.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+    rx.strokeStyle = C(0.35 + v * 0.65); rx.lineWidth = Math.max(2, R * 0.012); rx.stroke();
+  }
+  /* busto humanoide 3D em pontos */
+  const rot = s * 0.5, scale = R * 1.25, pulse = 1 + energy * 0.06;
+  for (const p of bust) {
+    const x = p.x * Math.cos(rot) - p.z * Math.sin(rot), z = p.x * Math.sin(rot) + p.z * Math.cos(rot);
+    const depth = (z + 0.3) / 0.6, px = cx + x * scale * pulse, py = cy + p.y * scale * pulse;
+    rx.fillStyle = C(0.25 + depth * 0.6); rx.fillRect(px, py, 1.6 + depth * 1.4, 1.6 + depth * 1.4);
+  }
+  /* reator no peito */
+  const gr = rx.createRadialGradient(cx, cy + R * 0.2, 0, cx, cy + R * 0.2, R * (0.08 + energy * 0.12));
+  gr.addColorStop(0, "rgba(255,255,255,0.95)"); gr.addColorStop(0.35, C(0.85)); gr.addColorStop(1, "rgba(0,0,0,0)");
+  rx.fillStyle = gr; rx.beginPath(); rx.arc(cx, cy + R * 0.2, R * 0.22, 0, Math.PI * 2); rx.fill();
+
+  /* onda */
+  const WW = wc.width, WH = wc.height; wx.clearRect(0, 0, WW, WH);
+  for (let layer = 0; layer < 3; layer++) {
+    wx.beginPath();
+    for (let x = 0; x <= WW; x += 4) {
+      const i = Math.floor((x / WW) * (freq ? freq.length * 0.7 : 1));
+      const amp = freq ? ((freq[i] || 0) / 255) * WH * 0.42 : WH * 0.04;
+      const y = WH / 2 + Math.sin(x * 0.02 + s * (3 + layer) + layer) * amp * (1 - layer * 0.25);
+      x ? wx.lineTo(x, y) : wx.moveTo(x, y);
+    }
+    wx.strokeStyle = C(0.85 - layer * 0.25); wx.lineWidth = 2 - layer * 0.5; wx.shadowBlur = 8; wx.shadowColor = C(1); wx.stroke();
+  }
+  wx.shadowBlur = 0;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+render();
+</script>
+</body>
+</html>

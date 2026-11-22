@@ -251,10 +251,11 @@ input, textarea, select { -webkit-user-select: text; user-select: text; }
       <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-200">🧬 <span id="boot-skill-count">0</span> HABILIDADES</span>
       <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-200">🤗 HUGGINGGPT</span>
       <span class="px-2 py-0.5 rounded-full bg-fuchsia-500/15 border border-fuchsia-400/35 text-fuchsia-200">🎙️ VOZ JARVIS</span>
+      <span class="px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-400/35 text-violet-200">🦙 OLLAMA</span>
     </div>
 
     <p class="text-xs sm:text-sm text-cyan-100/80 leading-relaxed">
-      <strong>Câmara Holográfica Humanoide</strong> • Voz em tempo real com o <strong>Jarvis</strong> • Fluxo inspirado no <strong>HuggingGPT</strong> (arXiv:2303.17580) • Central de Criação • Player de Música.
+      <strong>Câmara Holográfica Humanoide</strong> • Voz em tempo real com o <strong>Jarvis</strong> • Fluxo inspirado no <strong>HuggingGPT</strong> (arXiv:2303.17580) • Central de Criação • Player de Música • Chat <strong>Ollama</strong> (funciona sem o ElevenLabs).
     </p>
 
     <button id="btn-boot" class="cyber-btn w-full py-3.5 px-6 rounded-2xl font-orbitron font-bold text-sm tracking-[0.18em] uppercase">
@@ -300,6 +301,7 @@ input, textarea, select { -webkit-user-select: text; user-select: text; }
         <button id="btn-open-capcut" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">✂️ CAPCUT</button>
         <button id="btn-open-music" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">📺 YOUTUBE</button>
         <button id="btn-open-image" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">🎨 IMAGEM</button>
+        <button id="btn-open-ollama" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold" title="Chat local ou na nuvem com o Ollama, sem o ElevenLabs">🦙 OLLAMA</button>
         <button id="btn-open-studio" class="cyber-btn px-2.5 py-1.5 rounded-xl font-mono-tech text-[10px] font-bold">💻 ESTÚDIO</button>
         <button id="btn-camera" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Ligar a câmera na câmara holográfica (opcional)">📷 CÂMERA</button>
         <button id="btn-color-cycle" class="cyber-btn px-2 py-1.5 rounded-xl font-mono-tech text-[10px]" title="Mudar cor do painel">🎨 COR</button>
@@ -444,6 +446,7 @@ input, textarea, select { -webkit-user-select: text; user-select: text; }
         <button data-quick="/hugginggpt Planeia e executa " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🤗 /hugginggpt</button>
         <button data-quick="Escreve um roteiro de vídeo viral para CapCut sobre " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">✂️ /capcut</button>
         <button data-quick="Cria um roteiro de vídeo realista, cena a cena, sobre " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🎥 Vídeo Realista</button>
+        <button data-action="ollama" class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🦙 Ollama</button>
         <button data-action="image" class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">🎨 Gerar imagem</button>
         <button data-quick="Explica-me passo a passo como criar um jogo simples em HTML de " class="quick-cmd cyber-btn px-2 py-1 rounded-lg shrink-0">💻 Criar Jogo</button>
       </div>
@@ -452,7 +455,8 @@ input, textarea, select { -webkit-user-select: text; user-select: text; }
       <form id="cmd-form" class="flex items-center gap-1.5 shrink-0">
         <button type="button" id="btn-mic" class="cyber-btn p-2.5 rounded-xl text-sm shrink-0" title="Ativar / Encerrar conversa por voz com o Jarvis">🎙️</button>
         <button type="button" id="btn-handsfree" class="cyber-btn p-2.5 rounded-xl text-sm shrink-0" title="Silenciar / reativar o seu microfone na sessão" disabled>👂</button>
-        <input id="cmd-input" type="text" autocomplete="off" placeholder="Ordem para o Jarvis, ou «toca Coldplay Yellow»..." class="flex-1 min-w-0 bg-black/60 border border-cyan-500/35 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" />
+        <input id="cmd-input" type="text" autocomplete="off" placeholder="Ordem para o Jarvis, «toca …» ou «ollama …»..." class="flex-1 min-w-0 bg-black/60 border border-cyan-500/35 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" />
+        <button type="button" id="btn-ollama-mode" class="cyber-btn px-2.5 py-2.5 rounded-xl font-mono-tech text-[10px] font-bold shrink-0" title="Alternar a barra de comando entre Jarvis e Ollama">🦙 JARVIS</button>
         <button type="submit" class="cyber-btn px-4 py-2.5 rounded-xl font-orbitron font-bold text-xs shrink-0">ENVIAR</button>
       </form>
     </section>
@@ -793,6 +797,78 @@ O futuro começa agora — inscreva-se no canal</textarea>
   </div>
 </div>
 
+
+<!-- ==================== MODAL 6: OLLAMA ==================== -->
+<div id="modal-ollama" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+  <div class="hud-panel rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="p-3 border-b border-cyan-500/25 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <h3 class="font-orbitron font-bold text-xs sm:text-sm hud-glow-text">🦙 OLLAMA · CHAT LOCAL / NUVEM</h3>
+        <p class="font-mono-tech text-[10px] text-cyan-200/70">Funciona sem o ElevenLabs. A chave API fica só neste navegador, nunca no site.</p>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span id="ollama-status-pill" class="font-mono-tech text-[9px] px-2 py-0.5 rounded-full bg-slate-500/20 border border-slate-400/30 text-slate-200">DESLIGADO</span>
+        <button data-close="modal-ollama" class="cyber-btn px-3 py-1 rounded-xl text-xs">✕</button>
+      </div>
+    </div>
+
+    <div class="hud-scroll p-3 overflow-y-auto flex-1 min-h-0 space-y-3">
+      <div class="rounded-xl bg-black/45 border border-cyan-500/20 p-2.5 space-y-2">
+        <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">DEFINIÇÕES (GUARDADAS NESTE NAVEGADOR)</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <label class="flex flex-col gap-1">
+            <span class="font-mono-tech text-[9px] text-cyan-200/80">Endereço base</span>
+            <input id="ollama-host" type="text" autocomplete="off" spellcheck="false" placeholder="http://localhost:11434" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="font-mono-tech text-[9px] text-cyan-200/80">Chave API (opcional, Ollama na nuvem)</span>
+            <input id="ollama-key" type="password" autocomplete="off" spellcheck="false" placeholder="Só para https://ollama.com" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+          </label>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <label class="flex-1 flex flex-col gap-1 min-w-0">
+            <span class="font-mono-tech text-[9px] text-cyan-200/80">Modelo</span>
+            <select id="ollama-model" class="bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+              <option value="">— teste a ligação para listar —</option>
+            </select>
+          </label>
+          <div class="flex items-end gap-1.5 shrink-0">
+            <button type="button" id="btn-ollama-test" class="cyber-btn px-3 py-2 rounded-xl font-mono-tech text-[10px] font-bold">🔌 TESTAR LIGAÇÃO</button>
+            <button type="button" id="btn-ollama-refresh" class="cyber-btn px-3 py-2 rounded-xl font-mono-tech text-[10px] font-bold" title="Atualizar a lista de modelos">↻</button>
+          </div>
+        </div>
+        <div id="ollama-cloud-warn" class="hidden rounded-xl bg-amber-500/10 border border-amber-400/30 px-2.5 py-2 font-mono-tech text-[10px] text-amber-100 leading-relaxed">
+          O Ollama na nuvem (<span class="text-white">https://ollama.com/api</span>) não aceita pedidos diretos do navegador (CORS). O servidor não envia <span class="text-white">Access-Control-Allow-Origin</span> e o pré-voo OPTIONS devolve 405. Use o Ollama no seu computador (<span class="text-white">http://localhost:11434</span>) ou um proxy no servidor. Não coloque a chave API no código do site.
+        </div>
+        <div id="ollama-test-msg" class="font-mono-tech text-[10px] text-cyan-200/70 whitespace-pre-wrap leading-relaxed"></div>
+        <details class="rounded-xl bg-black/40 border border-cyan-500/15 px-2.5 py-2">
+          <summary class="font-mono-tech text-[10px] text-cyan-200 cursor-pointer">Como autorizar o GitHub Pages no Ollama local (OLLAMA_ORIGINS)</summary>
+          <div id="ollama-origins-help" class="mt-2 font-mono-tech text-[10px] text-cyan-100/85 whitespace-pre-wrap leading-relaxed"></div>
+        </details>
+      </div>
+
+      <div class="rounded-xl bg-black/45 border border-cyan-500/20 p-2.5 flex flex-col gap-2 min-h-[240px]">
+        <div class="flex items-center justify-between gap-2">
+          <div class="font-mono-tech text-[10px] text-cyan-300 font-bold">CONVERSA DESTA SESSÃO</div>
+          <div class="flex gap-1.5">
+            <button type="button" id="btn-ollama-speak" class="cyber-btn px-2 py-1 rounded-lg font-mono-tech text-[10px]" title="Ler a última resposta em voz alta">🔊 LER</button>
+            <button type="button" id="btn-ollama-stop-speak" class="cyber-btn px-2 py-1 rounded-lg font-mono-tech text-[10px]" title="Parar a leitura">🔇</button>
+            <button type="button" id="btn-ollama-stop" class="cyber-btn px-2 py-1 rounded-lg font-mono-tech text-[10px]">⏹ PARAR</button>
+            <button type="button" id="btn-ollama-clear" class="cyber-btn px-2 py-1 rounded-lg font-mono-tech text-[10px]">LIMPAR</button>
+          </div>
+        </div>
+        <div id="ollama-chat-log" class="hud-scroll flex-1 min-h-[180px] max-h-[40vh] overflow-y-auto space-y-2 pr-1 text-xs">
+          <div id="ollama-chat-empty" class="text-center text-cyan-300/50 font-mono-tech text-[10px] mt-6 leading-relaxed">Escreva «ollama …» na barra de comando, ou pergunte aqui. Os comandos de música continuam a ter prioridade.</div>
+        </div>
+        <form id="ollama-form" class="flex items-center gap-1.5">
+          <input id="ollama-input" type="text" autocomplete="off" placeholder="Pergunte ao Ollama…" class="flex-1 min-w-0 bg-black/55 border border-cyan-500/35 rounded-xl px-3 py-2 text-xs sm:text-sm text-white placeholder-cyan-200/40 focus:outline-none focus:border-cyan-400" />
+          <button type="submit" class="cyber-btn px-3 py-2 rounded-xl font-orbitron font-bold text-xs shrink-0">ENVIAR</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- NOTIFICAÇÃO (toast) -->
 <div id="hud-toast" class="hidden pointer-events-none fixed top-4 left-1/2 -translate-x-1/2 z-[60] hud-panel rounded-full px-4 py-2 font-mono-tech text-xs text-white shadow-2xl"></div>
 
@@ -958,12 +1034,15 @@ function render() {
 function addChat(role, text) {
   const e = $("chat-empty"); if (e) e.remove();
   const d = document.createElement("div");
-  const isUser = role === "user", isSys = role === "sys";
-  d.className = "rounded-xl px-2.5 py-1.5 border " + (isUser ? "bg-amber-500/10 border-amber-400/30 ml-4" : isSys ? "bg-black/30 border-cyan-500/15 text-cyan-200/70" : "bg-cyan-500/10 border-cyan-400/30 mr-4");
-  d.innerHTML = '<div class="font-mono-tech text-[9px] mb-0.5 ' + (isUser ? "text-amber-300" : "text-cyan-300") + '">' +
-    (isUser ? "VOCÊ" : isSys ? "SISTEMA" : "JARVIS") + " · " + hhmm() + '</div><div class="text-cyan-50 whitespace-pre-wrap leading-snug"></div>';
+  const isUser = role === "user", isSys = role === "sys", isOl = role === "ollama";
+  d.className = "rounded-xl px-2.5 py-1.5 border " + (isUser ? "bg-amber-500/10 border-amber-400/30 ml-4" : isSys ? "bg-black/30 border-cyan-500/15 text-cyan-200/70" : isOl ? "bg-violet-500/10 border-violet-400/30 mr-4" : "bg-cyan-500/10 border-cyan-400/30 mr-4");
+  const label = isUser ? "VOCÊ" : isSys ? "SISTEMA" : isOl ? "OLLAMA" : "JARVIS";
+  const lcls = isUser ? "text-amber-300" : isOl ? "text-violet-300" : "text-cyan-300";
+  d.innerHTML = '<div class="font-mono-tech text-[9px] mb-0.5 ' + lcls + '">' +
+    label + " · " + hhmm() + '</div><div class="text-cyan-50 whitespace-pre-wrap leading-snug"></div>';
   d.lastChild.textContent = text;
   $("chat-log").append(d); $("chat-log").scrollTop = $("chat-log").scrollHeight;
+  return d;
 }
 $("btn-clear-chat").onclick = () => { $("chat-log").innerHTML = ""; toast("Transcrição limpa"); };
 
@@ -1107,11 +1186,13 @@ $("cmd-form").onsubmit = (e) => {
   e.preventDefault();
   const v = $("cmd-input").value;
   if (localMusicCommand(v)) { addChat("user", v); $("cmd-input").value = ""; return; }
+  if (localOllamaCommand(v)) { $("cmd-input").value = ""; return; }
   if (sendToJarvis(v)) $("cmd-input").value = "";
 };
 $("cmd-input").addEventListener("input", () => { if (S.conv) try { S.conv.sendUserActivity(); } catch (e) {} });
 $$(".quick-cmd").forEach((b) => b.onclick = () => {
   if (b.dataset.action === "music") { $("cmd-input").value = "toca "; $("cmd-input").focus(); toast("🎵 Escreva a música e carregue em ENVIAR"); return; }
+  if (b.dataset.action === "ollama") { openModal("modal-ollama"); $("cmd-input").value = "ollama "; $("cmd-input").focus(); toast("🦙 Escreva a pergunta e carregue em ENVIAR"); return; }
   if (b.dataset.action === "image") return openModal("modal-image");
   $("cmd-input").value = b.dataset.quick; $("cmd-input").focus();
 });
@@ -1184,7 +1265,7 @@ renderTasks(); renderMemory();
 function openModal(id) { $(id).classList.remove("hidden"); }
 function closeModal(id) { $(id).classList.add("hidden"); }
 $$("[data-close]").forEach((b) => b.onclick = () => closeModal(b.dataset.close));
-$$("#modal-skills, #modal-creator, #modal-music, #modal-image, #modal-studio").forEach((m) => m.addEventListener("click", (e) => { if (e.target === m) closeModal(m.id); }));
+$$("#modal-skills, #modal-creator, #modal-music, #modal-image, #modal-studio, #modal-ollama").forEach((m) => m.addEventListener("click", (e) => { if (e.target === m) closeModal(m.id); }));
 addEventListener("keydown", (e) => { if (e.key === "Escape") $$("[id^=modal-]").forEach((m) => m.classList.add("hidden")); });
 $("btn-open-skills").onclick = () => openModal("modal-skills");
 $("btn-open-creator").onclick = () => { openModal("modal-creator"); showCTab("ctab-campaign"); };
@@ -1192,6 +1273,7 @@ $("btn-open-capcut").onclick = () => { openModal("modal-creator"); showCTab("cta
 $("btn-open-music").onclick = () => openModal("modal-music");
 $("btn-open-image").onclick = () => openModal("modal-image");
 $("btn-open-studio").onclick = () => openModal("modal-studio");
+$("btn-open-ollama").onclick = () => openModal("modal-ollama");
 $$(".mobile-tab").forEach((b) => b.onclick = () => {
   $$(".mobile-tab").forEach((x) => x.classList.toggle("active", x === b));
   $$(".hud-pane").forEach((p) => p.classList.toggle("mobile-active", p.id === b.dataset.pane));
@@ -1536,7 +1618,343 @@ const clientTools = {
   }
 };
 
-window.ARQUITETO = { clientTools, playQuery, duck }; // para diagnóstico na consola
+
+/* ==================== OLLAMA (chat no painel, independente do ElevenLabs) ==================== */
+const OLLAMA_PAGES_ORIGIN = "https://marcelo7777777.github.io";
+const O = {
+  host: LS.get("ollama_host", "http://localhost:11434"),
+  key: LS.get("ollama_key", ""),
+  model: LS.get("ollama_model", ""),
+  mode: !!LS.get("ollama_mode", false),
+  messages: [],
+  streaming: false,
+  abort: null,
+  models: [],
+  status: "offline"
+};
+
+function ollamaBase() {
+  let h = String(O.host || "").trim() || "http://localhost:11434";
+  h = h.replace(/\/+$/, "");
+  if (/\/api$/i.test(h)) h = h.replace(/\/api$/i, "");
+  return h;
+}
+function isOllamaCloud() {
+  try { return /(^|\.)ollama\.com$/i.test(new URL(ollamaBase()).hostname); }
+  catch (e) { return /ollama\.com/i.test(String(O.host || "")); }
+}
+function ollamaHeaders(json) {
+  const h = {};
+  if (json) h["Content-Type"] = "application/json";
+  const key = String(O.key || "").trim();
+  if (key) h["Authorization"] = "Bearer " + key;
+  return h;
+}
+function ollamaOriginsHelp() {
+  const o = OLLAMA_PAGES_ORIGIN;
+  return "O Ollama tem de estar a correr. Como esta página vem do GitHub Pages, é preciso autorizar a origem.\n\n"
+    + "Windows (cmd ou PowerShell). Depois reinicie o Ollama (ícone na bandeja):\n"
+    + "  setx OLLAMA_ORIGINS \"" + o + "\"\n\n"
+    + "macOS. Depois feche e reabra o Ollama:\n"
+    + "  launchctl setenv OLLAMA_ORIGINS \"" + o + "\"\n\n"
+    + "Linux (systemd):\n"
+    + "  sudo systemctl edit ollama.service\n"
+    + "Adicione:\n"
+    + "  [Service]\n"
+    + "  Environment=\"OLLAMA_ORIGINS=" + o + "\"\n"
+    + "Depois:\n"
+    + "  sudo systemctl daemon-reload && sudo systemctl restart ollama\n\n"
+    + "Para permitir qualquer origem, use * no lugar do endereço.\n\n"
+    + "Chrome e Edge deixam chamar http://localhost a partir de uma página https. O Safari pode bloquear esta ligação (conteúdo misto). Se isso acontecer, use o Chrome ou o Edge, ou abra o painel em http://localhost.";
+}
+function ollamaFetchError(why) {
+  if (isOllamaCloud()) {
+    return "O Ollama na nuvem (https://ollama.com/api) não aceita pedidos diretos do navegador (CORS). Confirmado: o servidor não envia Access-Control-Allow-Origin e o pré-voo OPTIONS devolve 405. Use o Ollama no seu computador (http://localhost:11434) ou um proxy no servidor. A chave API não deve ir para o código do site.";
+  }
+  return "Não consegui ligar ao Ollama em " + ollamaBase() + (why ? " (" + why + ")" : "") + ".\n\n" + ollamaOriginsHelp();
+}
+function saveOllamaSettings() {
+  O.host = $("ollama-host").value.trim() || "http://localhost:11434";
+  O.key = $("ollama-key").value;
+  O.model = $("ollama-model").value;
+  LS.set("ollama_host", O.host);
+  LS.set("ollama_key", O.key);
+  LS.set("ollama_model", O.model);
+  $("ollama-cloud-warn").classList.toggle("hidden", !isOllamaCloud());
+}
+function setOllamaMode(on) {
+  O.mode = !!on;
+  LS.set("ollama_mode", O.mode);
+  $("btn-ollama-mode").classList.toggle("active", O.mode);
+  $("btn-ollama-mode").textContent = O.mode ? "🦙 OLLAMA" : "🦙 JARVIS";
+  $("cmd-input").placeholder = O.mode
+    ? "Pergunta ao Ollama (música e comandos locais têm prioridade)..."
+    : "Ordem para o Jarvis, «toca …» ou «ollama …»...";
+  toast(O.mode ? "🦙 A barra de comando envia para o Ollama" : "🎙️ A barra de comando envia para o Jarvis");
+}
+function setOllamaPill(kind, label) {
+  const el = $("ollama-status-pill");
+  el.textContent = label;
+  el.className = "font-mono-tech text-[9px] px-2 py-0.5 rounded-full " + (
+    kind === "ok" ? "bg-emerald-500/20 border border-emerald-400/40 text-emerald-200"
+    : kind === "busy" ? "bg-amber-500/20 border border-amber-400/40 text-amber-200"
+    : kind === "err" ? "bg-rose-500/20 border border-rose-400/40 text-rose-200"
+    : "bg-slate-500/20 border border-slate-400/30 text-slate-200"
+  );
+}
+function fillOllamaModels(models, preferred) {
+  O.models = models || [];
+  const sel = $("ollama-model");
+  const want = preferred || O.model;
+  if (!O.models.length) {
+    sel.innerHTML = '<option value="">— nenhum modelo encontrado —</option>';
+    O.model = "";
+    LS.set("ollama_model", "");
+    return;
+  }
+  sel.innerHTML = O.models.map((n) => '<option value="' + esc(n) + '">' + esc(n) + "</option>").join("");
+  if (want && O.models.indexOf(want) !== -1) sel.value = want;
+  O.model = sel.value;
+  LS.set("ollama_model", O.model);
+}
+function appendOllamaLog(role, text) {
+  const empty = $("ollama-chat-empty"); if (empty) empty.remove();
+  const d = document.createElement("div");
+  const isUser = role === "user", isSys = role === "sys";
+  d.className = "rounded-xl px-2.5 py-1.5 border " + (isUser ? "bg-amber-500/10 border-amber-400/30 ml-4" : isSys ? "bg-black/30 border-cyan-500/15 text-cyan-200/70" : "bg-violet-500/10 border-violet-400/30 mr-4");
+  d.innerHTML = '<div class="font-mono-tech text-[9px] mb-0.5 ' + (isUser ? "text-amber-300" : isSys ? "text-cyan-300" : "text-violet-300") + '">' +
+    (isUser ? "VOCÊ" : isSys ? "SISTEMA" : "OLLAMA") + " · " + hhmm() + '</div><div class="text-cyan-50 whitespace-pre-wrap leading-snug"></div>';
+  d.lastChild.textContent = text;
+  $("ollama-chat-log").append(d);
+  $("ollama-chat-log").scrollTop = $("ollama-chat-log").scrollHeight;
+  return d;
+}
+async function ollamaFetch(path, opts) {
+  const url = ollamaBase() + path;
+  return fetch(url, Object.assign({ headers: ollamaHeaders(opts && opts.body) }, opts));
+}
+async function ollamaReadError(res) {
+  let detail = "";
+  try { const t = await res.text(); try { const j = JSON.parse(t); detail = j.error || t; } catch (e) { detail = t; } } catch (e) {}
+  detail = String(detail || "").trim().slice(0, 400);
+  if (res.status === 401 || res.status === 403) return "O Ollama recusou a autenticação (HTTP " + res.status + "). Se estiver a usar a nuvem, verifique a chave API nas definições." + (detail ? "\n" + detail : "");
+  if (res.status === 404) return "Recurso não encontrado (HTTP 404). Confirme o endereço e se o modelo está instalado (ollama pull …)." + (detail ? "\n" + detail : "");
+  return "O Ollama devolveu HTTP " + res.status + (detail ? ":\n" + detail : ".");
+}
+async function testOllama(quiet) {
+  saveOllamaSettings();
+  setOllamaPill("busy", "A TESTAR…");
+  if (!quiet) $("ollama-test-msg").textContent = "A testar " + ollamaBase() + " …";
+  try {
+    const res = await ollamaFetch("/api/tags", { method: "GET" });
+    if (!res.ok) {
+      const msg = await ollamaReadError(res);
+      O.status = "error"; setOllamaPill("err", "ERRO");
+      $("ollama-test-msg").textContent = msg;
+      if (!quiet) toast("🦙 Ligação falhou");
+      return false;
+    }
+    const data = await res.json();
+    const models = (data.models || []).map((m) => m.name || m.model).filter(Boolean);
+    fillOllamaModels(models, O.model);
+    O.status = "ok";
+    setOllamaPill("ok", models.length ? ("LIGADO · " + (O.model || models[0])) : "LIGADO · SEM MODELOS");
+    const msg = models.length
+      ? "Ligação ok. " + models.length + (models.length === 1 ? " modelo disponível." : " modelos disponíveis.")
+      : "Ligação ok, mas não há modelos. No computador, corra: ollama pull qwen2.5:0.5b";
+    $("ollama-test-msg").textContent = msg;
+    if (!quiet) toast("🦙 " + msg);
+    return true;
+  } catch (e) {
+    O.status = "error";
+    setOllamaPill("err", "SEM LIGAÇÃO");
+    $("ollama-test-msg").textContent = ollamaFetchError(e && e.message);
+    if (!quiet) toast("🦙 Sem ligação ao Ollama");
+    return false;
+  }
+}
+async function ollamaChat(text) {
+  text = String(text || "").trim();
+  if (!text) { toast("Escreva uma pergunta para o Ollama"); return false; }
+  if (O.streaming) { toast("O Ollama ainda está a responder. Toque em PARAR para cancelar."); return false; }
+  saveOllamaSettings();
+  if (!O.model) {
+    openModal("modal-ollama");
+    toast("Escolha um modelo do Ollama (teste a ligação primeiro)");
+    appendOllamaLog("sys", "Escolha um modelo nas definições e volte a perguntar.");
+    return false;
+  }
+  O.messages.push({ role: "user", content: text });
+  addChat("user", text);
+  appendOllamaLog("user", text);
+  const assistant = { role: "assistant", content: "" };
+  O.messages.push(assistant);
+  const bubbleMain = addChat("ollama", "…");
+  const bubbleModal = appendOllamaLog("assistant", "…");
+  const paint = () => {
+    const t = assistant.content || "…";
+    bubbleMain.lastChild.textContent = t;
+    bubbleModal.lastChild.textContent = t;
+    $("chat-log").scrollTop = $("chat-log").scrollHeight;
+    $("ollama-chat-log").scrollTop = $("ollama-chat-log").scrollHeight;
+  };
+  O.streaming = true;
+  O.abort = new AbortController();
+  setOllamaPill("busy", "A ESCREVER…");
+  try {
+    const payload = {
+      model: O.model,
+      messages: O.messages.filter((m) => m !== assistant),
+      stream: true
+    };
+    const res = await ollamaFetch("/api/chat", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      signal: O.abort.signal
+    });
+    if (!res.ok) {
+      const msg = await ollamaReadError(res);
+      assistant.content = msg;
+      paint();
+      addChat("sys", "Ollama: pedido recusado.");
+      O.status = "error"; setOllamaPill("err", "ERRO");
+      return false;
+    }
+    const reader = res.body && res.body.getReader ? res.body.getReader() : null;
+    if (!reader) {
+      const raw = await res.text();
+      let ev; try { ev = JSON.parse(raw); } catch (e) { ev = null; }
+      assistant.content = (ev && ev.message && ev.message.content) || raw || "(resposta vazia)";
+      paint();
+    } else {
+      const dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        buf += dec.decode(chunk.value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop();
+        for (let i = 0; i < lines.length; i++) {
+          let s = lines[i].trim();
+          if (!s) continue;
+          if (s.indexOf("data:") === 0) s = s.slice(5).trim();
+          if (s === "[DONE]") continue;
+          let ev; try { ev = JSON.parse(s); } catch (e) { continue; }
+          if (ev.error) { assistant.content = (assistant.content ? assistant.content + "\n" : "") + String(ev.error); paint(); continue; }
+          const piece = (ev.message && ev.message.content) || ev.response || "";
+          if (piece) { assistant.content += piece; paint(); }
+        }
+      }
+      if (buf.trim()) {
+        let s = buf.trim();
+        if (s.indexOf("data:") === 0) s = s.slice(5).trim();
+        try {
+          const ev = JSON.parse(s);
+          const piece = (ev.message && ev.message.content) || ev.response || "";
+          if (piece) { assistant.content += piece; paint(); }
+        } catch (e) {}
+      }
+    }
+    if (!assistant.content) { assistant.content = "(sem conteúdo na resposta)"; paint(); }
+    O.status = "ok";
+    setOllamaPill("ok", "LIGADO · " + O.model);
+    return true;
+  } catch (e) {
+    if (e && e.name === "AbortError") {
+      if (!assistant.content) { assistant.content = "(resposta interrompida)"; paint(); }
+      setOllamaPill("ok", "LIGADO · " + (O.model || ""));
+      return false;
+    }
+    const msg = ollamaFetchError(e && e.message);
+    assistant.content = msg;
+    paint();
+    addChat("sys", "Falha ao falar com o Ollama.");
+    openModal("modal-ollama");
+    $("ollama-test-msg").textContent = msg;
+    O.status = "error"; setOllamaPill("err", "SEM LIGAÇÃO");
+    return false;
+  } finally {
+    O.streaming = false;
+    O.abort = null;
+  }
+}
+function localOllamaCommand(text) {
+  const t = String(text || "").trim();
+  let m;
+  if (/^(modo\s+ollama|usar\s+o\s+ollama|ollama\s+on)$/i.test(t)) { setOllamaMode(true); addChat("sys", "Barra de comando no modo Ollama."); return true; }
+  if (/^(modo\s+jarvis|usar\s+o\s+jarvis|ollama\s+off)$/i.test(t)) { setOllamaMode(false); addChat("sys", "Barra de comando no modo Jarvis."); return true; }
+  if (/^(ollama|\/ollama)\s*$/i.test(t) || /^(ollama|\/ollama)\s+(config|defini[cç][oõ]es|settings)$/i.test(t)) { openModal("modal-ollama"); return true; }
+  if ((m = t.match(/^(?:\/?ollama)\s*[:\-]\s*(.+)$/i)) || (m = t.match(/^(?:\/?ollama)\s+(.+)$/i))) {
+    ollamaChat(m[1]);
+    return true;
+  }
+  if ((m = t.match(/^(?:pergunta(?:r)?(?:\s+ao)?\s+ollama|ask\s+ollama)\s*[:\-]\s*(.+)$/i)) || (m = t.match(/^(?:pergunta(?:r)?(?:\s+ao)?\s+ollama|ask\s+ollama)\s+(.+)$/i))) {
+    ollamaChat(m[1]);
+    return true;
+  }
+  if (O.mode) { ollamaChat(t); return true; }
+  return false;
+}
+function speakOllama(text) {
+  if (!window.speechSynthesis) { toast("Este navegador não lê em voz alta"); return; }
+  const t = String(text || "").trim();
+  if (!t) { toast("Ainda não há resposta para ler"); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  const pick = () => {
+    const voices = speechSynthesis.getVoices() || [];
+    return voices.find((v) => /pt-BR/i.test(v.lang)) || voices.find((v) => /pt-PT/i.test(v.lang)) || voices.find((v) => /^pt/i.test(v.lang));
+  };
+  const apply = () => { const v = pick(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "pt-BR"; };
+  apply();
+  if (!pick() && speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = () => { apply(); };
+  }
+  u.rate = 1.02;
+  speechSynthesis.speak(u);
+  toast("🔊 A ler a resposta");
+}
+$("ollama-origins-help").textContent = ollamaOriginsHelp();
+$("ollama-host").value = O.host || "http://localhost:11434";
+$("ollama-key").value = O.key || "";
+if (O.model) fillOllamaModels([O.model], O.model);
+$("ollama-cloud-warn").classList.toggle("hidden", !isOllamaCloud());
+$("btn-ollama-mode").classList.toggle("active", O.mode);
+$("btn-ollama-mode").textContent = O.mode ? "🦙 OLLAMA" : "🦙 JARVIS";
+if (O.mode) $("cmd-input").placeholder = "Pergunta ao Ollama (música e comandos locais têm prioridade)...";
+$("btn-open-ollama").onclick = () => { openModal("modal-ollama"); if (O.status === "offline" || O.status === "error") testOllama(true); };
+$("btn-ollama-mode").onclick = () => setOllamaMode(!O.mode);
+$("btn-ollama-test").onclick = () => testOllama(false);
+$("btn-ollama-refresh").onclick = () => testOllama(false);
+$("ollama-host").onchange = saveOllamaSettings;
+$("ollama-host").onblur = saveOllamaSettings;
+$("ollama-key").onchange = saveOllamaSettings;
+$("ollama-key").onblur = saveOllamaSettings;
+$("ollama-model").onchange = saveOllamaSettings;
+$("ollama-form").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("ollama-input").value.trim();
+  if (!v) { toast("Escreva uma pergunta para o Ollama"); return; }
+  if (O.streaming) { toast("O Ollama ainda está a responder. Toque em PARAR para cancelar."); return; }
+  if (!O.model) { toast("Escolha um modelo do Ollama (teste a ligação primeiro)"); return; }
+  $("ollama-input").value = "";
+  ollamaChat(v);
+};
+$("btn-ollama-stop").onclick = () => { if (O.abort) O.abort.abort(); };
+$("btn-ollama-clear").onclick = () => {
+  if (O.streaming && O.abort) O.abort.abort();
+  O.messages = [];
+  $("ollama-chat-log").innerHTML = '<div id="ollama-chat-empty" class="text-center text-cyan-300/50 font-mono-tech text-[10px] mt-6 leading-relaxed">Conversa limpa. O histórico desta sessão recomeça agora.</div>';
+  toast("🦙 Conversa do Ollama limpa");
+};
+$("btn-ollama-speak").onclick = () => {
+  const last = [...O.messages].reverse().find((m) => m.role === "assistant" && m.content);
+  speakOllama(last ? last.content : "");
+};
+$("btn-ollama-stop-speak").onclick = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
+
+window.ARQUITETO = { clientTools, playQuery, duck, ollamaChat, testOllama }; // para diagnóstico na consola
 
 /* Central de música (modal) */
 $("btn-music-search").onclick = () => { const q = $("music-query-input").value.trim(); if (!q) return toast("Escreva o que quer ouvir"); playQuery(q); };
